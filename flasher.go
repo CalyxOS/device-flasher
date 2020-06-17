@@ -17,6 +17,8 @@ package main
 
 import (
 	"archive/zip"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -188,11 +190,21 @@ func getPlatformTools() error {
 	if err == nil {
 		killAdb()
 	}
+	err = verifyPlatformToolsZip()
+	if err != nil {
+		fmt.Println("Failed to verify " + PLATFORM_TOOLS_ZIP)
+		return err
+	}
 	err = extractZip(PLATFORM_TOOLS_ZIP, cwd)
 	if err != nil {
 		fmt.Println("There are missing Android platform tools in PATH. Attempting to download https://dl.google.com/android/repository/" + PLATFORM_TOOLS_ZIP)
 		err = downloadFile("https://dl.google.com/android/repository/" + PLATFORM_TOOLS_ZIP)
 		if err != nil {
+			return err
+		}
+		err = verifyPlatformToolsZip()
+		if err != nil {
+			fmt.Println("Failed to verify " + PLATFORM_TOOLS_ZIP)
 			return err
 		}
 		err = extractZip(PLATFORM_TOOLS_ZIP, cwd)
@@ -392,6 +404,38 @@ func extractZip(src, dest string) error {
 	}
 
 	return nil
+}
+
+func verifyZip(zipfile, sha256sum string) error {
+	f, err := os.Open(zipfile)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	h := sha256.New()
+	if _, err := io.Copy(h, f); err != nil {
+		return err
+	}
+	sum := hex.EncodeToString(h.Sum(nil))
+	fmt.Println("sha256sum: " + sum + " " + zipfile)
+	if sha256sum == sum {
+		return nil
+	}
+	return errors.New("SHA256 mismatch")
+}
+
+func verifyPlatformToolsZip() error {
+	zipfile := string(PLATFORM_TOOLS_ZIP)
+	switch OS {
+	case "linux":
+		return verifyZip(zipfile, LINUX_SHA256)
+	case "darwin":
+		return verifyZip(zipfile, DARWIN_SHA256)
+	case "windows":
+		return verifyZip(zipfile, WINDOWS_SHA256)
+	}
+	return errors.New("Unknown platform")
 }
 
 type WriteCounter struct {
