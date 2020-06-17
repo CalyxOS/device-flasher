@@ -47,7 +47,7 @@ var input string
 
 var altosImage string
 var altosPath string
-var device string
+var deviceCodename string
 var devices []string
 
 var (
@@ -107,10 +107,10 @@ func main() {
 		}
 	}
 	fmt.Println("Detected " + strconv.Itoa(len(devices)) + " devices: " + strings.Join(devices, ", "))
-	device = getProp("ro.product.device", devices[0])
-	if device == "" {
-		device = getVar("product", devices[0])
-		if device == "" {
+	deviceCodename = getProp("ro.product.device", devices[0])
+	if deviceCodename == "" {
+		deviceCodename = getVar("product", devices[0])
+		if deviceCodename == "" {
 			fatalln(errors.New("Cannot determine device model. Exiting..."))
 		}
 	}
@@ -126,7 +126,7 @@ func checkPrerequisiteFiles() {
 	}
 	for _, file := range files {
 		file := file.Name()
-		if strings.Contains(file, strings.ToLower(device)) && strings.HasSuffix(file, ".zip") {
+		if strings.Contains(file, strings.ToLower(deviceCodename)) && strings.HasSuffix(file, ".zip") {
 			if strings.Contains(file, "factory") {
 				altosImage = file
 			}
@@ -152,7 +152,7 @@ func prepareFactoryImage() {
 		fatalln(err)
 	}
 	for _, file := range files {
-		if file.IsDir() && strings.HasPrefix(file.Name(), strings.ToLower(device)) {
+		if file.IsDir() && strings.HasPrefix(file.Name(), strings.ToLower(deviceCodename)) {
 			_, err := os.Stat(cwd + file.Name() + string(os.PathSeparator) + "flash-all.sh")
 			if err != nil {
 				altosPath = file.Name()
