@@ -38,7 +38,13 @@ var executable, _ = os.Executable()
 var cwd = filepath.Dir(executable)
 
 const OS = runtime.GOOS
-const PLATFORM_TOOLS_ZIP = "platform-tools-latest-" + OS + ".zip"
+const PLATFORM_TOOLS_ZIP = "platform-tools_r30.0.2-" + OS + ".zip"
+
+const (
+	LINUX_SHA256 = "f7306a7c66d8149c4430aff270d6ed644c720ea29ef799dc613d3dc537485c6e"
+	DARWIN_SHA256 = "ab9dbab873fff677deb2cfd95ea60b9295ebd53b58ec8533e9e1110b2451e540"
+	WINDOWS_SHA256 = "265dd7b55f58dff1a5ad5073a92f4a5308bd070b72bd8b0d604674add6db8a41"
+)
 
 var adb *exec.Cmd
 var fastboot *exec.Cmd
