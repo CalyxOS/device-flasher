@@ -1,4 +1,5 @@
 Copyright © 2020 CIS Maxwell, LLC. All rights reserved.
+Copyright © 2020 The Calyx Institute
 
 Prerequisites:
     Plug each device of a same model to a USB port
