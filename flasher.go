@@ -45,11 +45,7 @@ var fastboot *exec.Cmd
 var input string
 
 var altosImage string
-var altosKey string
-var factoryImage string
-var bootloader string
-var radio string
-var image string
+var altosPath string
 var device string
 var devices []string
 
@@ -118,6 +114,7 @@ func main() {
 		}
 	}
 	checkPrerequisiteFiles()
+	prepareFactoryImage()
 	flashDevices()
 }
 
@@ -130,16 +127,36 @@ func checkPrerequisiteFiles() {
 		file := file.Name()
 		if strings.Contains(file, strings.ToLower(device)) && strings.HasSuffix(file, ".zip") {
 			if strings.Contains(file, "factory") {
-				factoryImage = file
-			} else if strings.Contains(file, "-img-") {
 				altosImage = file
 			}
-		} else if strings.HasSuffix(file, ".bin") {
-			altosKey = file
 		}
 	}
 	if altosImage == "" {
-		fatalln(errors.New("Cannot continue without altOS device image. Exiting..."))
+		fatalln(errors.New("Cannot continue without altOS factory image. Exiting..."))
+	}
+}
+
+func prepareFactoryImage() {
+	err := errors.New("")
+	if altosImage != "" {
+		fmt.Println("Preparing altOS factory image for flashing")
+		err = extractZip(path.Base(altosImage), cwd)
+		if err != nil {
+			errorln("Cannot continue without the device altOS factory image. Exiting...")
+			fatalln(err)
+		}
+	}
+	files, err := ioutil.ReadDir(cwd)
+	if err != nil {
+		fatalln(err)
+	}
+	for _, file := range files {
+		if file.IsDir() && strings.HasPrefix(file.Name(), strings.ToLower(device)) {
+			_, err := os.Stat(cwd + file.Name() + string(os.PathSeparator) + "flash-all.sh")
+			if err != nil {
+				altosPath = file.Name()
+			}
+		}
 	}
 }
 
@@ -257,6 +274,7 @@ func flashDevices() {
 		wg.Add(1)
 		go func(device string) {
 			defer wg.Done()
+			err := errors.New("")
 			platformToolCommand := *adb
 			platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "reboot", "bootloader")
 			_ = platformToolCommand.Run()
@@ -270,48 +288,29 @@ func flashDevices() {
 				errorln("Failed to unlock device " + device + " bootloader")
 				return
 			}
-			platformToolCommand = *fastboot
-			err := errors.New("")
+			os.Chdir(altosPath)
+			flashCmd := exec.Command("")
+			if OS == "windows" {
+				flashCmd = exec.Command("./flash-all.bat")
+			} else {
+				flashCmd = exec.Command("./flash-all.sh")
+			}
 			fmt.Println("Flashing altOS on device " + device + "...")
-			platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "--skip-reboot", "update", altosImage)
-			err = platformToolCommand.Run()
+			output, err := flashCmd.Output()
+			fmt.Printf("%s\n", output)
 			if err != nil {
-				errorln("Failed to flash altOS on device " + device)
+				errorln("Failed to flash altOS for device " + device)
 				return
 			}
-			fmt.Println("Wiping userdata for device " + device + "...")
+			fmt.Println("Locking device " + device + " bootloader...")
+			fmt.Println("Please use the volume and power keys on the device to confirm.")
 			platformToolCommand = *fastboot
-			platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "-w", "reboot-bootloader")
-			err = platformToolCommand.Run()
-			if err != nil {
-				errorln("Failed to wipe userdata for device " + device)
+			platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "flashing", "lock")
+			_ = platformToolCommand.Start()
+			time.Sleep(5 * time.Second)
+			if getVar("unlocked", device) != "no" {
+				errorln("Failed to lock device " + device + " bootloader")
 				return
-			}
-			if altosKey != "" {
-				fmt.Println("Locking device " + device + " bootloader...")
-				platformToolCommand := *fastboot
-				platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "erase", "avb_custom_key")
-				err := platformToolCommand.Run()
-				if err != nil {
-					errorln("Failed to erase avb_custom_key for device " + device)
-					return
-				}
-				platformToolCommand = *fastboot
-				platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "flash", "avb_custom_key", altosKey)
-				err = platformToolCommand.Run()
-				if err != nil {
-					errorln("Failed to flash avb_custom_key for device " + device)
-					return
-				}
-				fmt.Println("Please use the volume and power keys on the device to confirm.")
-				platformToolCommand = *fastboot
-				platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "flashing", "lock")
-				_ = platformToolCommand.Start()
-				time.Sleep(5 * time.Second)
-				if getVar("unlocked", device) != "no" {
-					errorln("Failed to lock device " + device + " bootloader")
-					return
-				}
 			}
 			fmt.Println("Rebooting " + device + "...")
 			platformToolCommand = *fastboot
