@@ -150,6 +150,13 @@ func getPlatformTools() error {
 	if OS == "windows" {
 		adbPath += ".exe"
 		fastbootPath += ".exe"
+		path := os.Getenv("Path")
+		newpath := platformToolsPath + string(os.PathListSeparator) + path
+		os.Setenv("Path", newpath)
+	} else {
+		path := os.Getenv("PATH")
+		newpath := platformToolsPath + string(os.PathListSeparator) + path
+		os.Setenv("PATH", newpath)
 	}
 	adb = exec.Command(adbPath)
 	fastboot = exec.Command(fastbootPath)
