@@ -279,15 +279,17 @@ func flashDevices() {
 			platformToolCommand := *adb
 			platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "reboot", "bootloader")
 			_ = platformToolCommand.Run()
-			fmt.Println("Unlocking device " + device + " bootloader...")
-			fmt.Println("Please use the volume and power keys on the device to confirm.")
-			platformToolCommand = *fastboot
-			platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "flashing", "unlock")
-			_ = platformToolCommand.Start()
-			time.Sleep(5 * time.Second)
 			if getVar("unlocked", device) != "yes" {
-				errorln("Failed to unlock device " + device + " bootloader")
-				return
+				fmt.Println("Unlocking device " + device + " bootloader...")
+				fmt.Println("Please use the volume and power keys on the device to confirm.")
+				platformToolCommand = *fastboot
+				platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "flashing", "unlock")
+				_ = platformToolCommand.Start()
+				time.Sleep(5 * time.Second)
+				if getVar("unlocked", device) != "yes" {
+					errorln("Failed to unlock device " + device + " bootloader")
+					return
+				}
 			}
 			os.Chdir(altosPath)
 			flashCmd := exec.Command("")
