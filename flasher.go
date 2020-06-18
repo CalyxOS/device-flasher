@@ -34,6 +34,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"fyne.io/fyne/widget"
+	"fyne.io/fyne/app"
 )
 
 var executable, _ = os.Executable()
@@ -105,6 +107,23 @@ func cleanup() {
 }
 
 func main() {
+	app := app.New()
+
+	w := app.NewWindow("CalyxOS Device Flasher")
+	w.SetContent(widget.NewVBox(
+		widget.NewLabel("Hello!"),
+		widget.NewButton("Flash", func() {
+			flash()
+		}),
+		widget.NewButton("Quit", func() {
+			app.Quit()
+		}),
+	))
+
+	w.ShowAndRun()
+}
+
+func flash() {
 	_ = os.Remove("error.log")
 	err := getPlatformTools()
 	if err != nil {
