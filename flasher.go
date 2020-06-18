@@ -48,6 +48,12 @@ const (
 	WINDOWS_SHA256 = "265dd7b55f58dff1a5ad5073a92f4a5308bd070b72bd8b0d604674add6db8a41"
 )
 
+const (
+	UDEV_RULES = "# Google\nSUBSYSTEM==\"usb\", ATTR{idVendor}==\"18d1\", GROUP=\"sudo\"\n# Xiaomi\nSUBSYSTEM==\"usb\", ATTR{idVendor}==\"2717\", GROUP=\"sudo\"\n"
+	RULES_FILE = "98-device-flasher.rules"
+	RULES_PATH = "/etc/udev/rules.d2/"
+)
+
 var adb *exec.Cmd
 var fastboot *exec.Cmd
 
@@ -80,6 +86,7 @@ func fatalln(err error) {
 	_, _ = fmt.Fprintln(os.Stderr, Error(err.Error()))
 	_, _ = fmt.Fprintln(log, err.Error())
 	log.Close()
+	cleanup()
 	os.Exit(1)
 }
 
@@ -88,6 +95,13 @@ func errorln(err string) {
 	defer log.Close()
 	_, _ = fmt.Fprintln(log, err)
 	_, _ = fmt.Fprintln(os.Stderr, Error(err))
+}
+
+func cleanup() {
+	_, err := os.Stat(RULES_PATH + RULES_FILE)
+	if !os.IsNotExist(err) {
+		_ = exec.Command("sudo", "rm", RULES_PATH + RULES_FILE).Run()
+	}
 }
 
 func main() {
@@ -125,6 +139,7 @@ func main() {
 	checkPrerequisiteFiles()
 	prepareFactoryImage()
 	flashDevices()
+	defer cleanup()
 }
 
 func checkPrerequisiteFiles() {
@@ -213,22 +228,22 @@ func getPlatformTools() error {
 }
 
 func checkUdevRules() {
-	_, err := os.Stat("/etc/udev/rules.d/")
+	_, err := os.Stat(RULES_PATH)
 	if os.IsNotExist(err) {
-		err = exec.Command("sudo", "mkdir", "/etc/udev/rules.d/").Run()
+		err = exec.Command("sudo", "mkdir", RULES_PATH).Run()
 		if err != nil {
 			errorln("Cannot continue without udev rules. Exiting...")
 			fatalln(err)
 		}
-		_, err = os.Stat("99-android.rules")
+		_, err = os.Stat(RULES_FILE)
 		if os.IsNotExist(err) {
-			err = downloadFile("https://raw.githubusercontent.com/invisiblek/udevrules/master/99-android.rules")
+			err = ioutil.WriteFile(RULES_FILE, []byte(UDEV_RULES), 0644)
 			if err != nil {
 				errorln("Cannot continue without udev rules. Exiting...")
 				fatalln(err)
 			}
 		}
-		err = exec.Command("sudo", "cp", "99-android.rules", "/etc/udev/rules.d/").Run()
+		err = exec.Command("sudo", "cp", RULES_FILE, RULES_PATH).Run()
 		if err != nil {
 			errorln("Cannot continue without udev rules. Exiting...")
 			fatalln(err)
