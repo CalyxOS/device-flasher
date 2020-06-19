@@ -59,8 +59,8 @@ var fastboot *exec.Cmd
 
 var input string
 
-var altosImage string
-var altosPath string
+var calyxosImage string
+var calyxosPath string
 var deviceCodename string
 var devices []string
 
@@ -150,22 +150,22 @@ func checkPrerequisiteFiles() {
 		file := file.Name()
 		if strings.Contains(file, strings.ToLower(deviceCodename)) && strings.HasSuffix(file, ".zip") {
 			if strings.Contains(file, "factory") {
-				altosImage = file
+				calyxosImage = file
 			}
 		}
 	}
-	if altosImage == "" {
-		fatalln(errors.New("Cannot continue without altOS factory image. Exiting..."))
+	if calyxosImage == "" {
+		fatalln(errors.New("Cannot continue without CalyxOS factory image. Exiting..."))
 	}
 }
 
 func prepareFactoryImage() {
 	err := errors.New("")
-	if altosImage != "" {
-		fmt.Println("Preparing altOS factory image for flashing")
-		err = extractZip(path.Base(altosImage), cwd)
+	if calyxosImage != "" {
+		fmt.Println("Preparing CalyxOS factory image for flashing")
+		err = extractZip(path.Base(calyxosImage), cwd)
 		if err != nil {
-			errorln("Cannot continue without the device altOS factory image. Exiting...")
+			errorln("Cannot continue without the device CalyxOS factory image. Exiting...")
 			fatalln(err)
 		}
 	}
@@ -177,7 +177,7 @@ func prepareFactoryImage() {
 		if file.IsDir() && strings.HasPrefix(file.Name(), strings.ToLower(deviceCodename)) {
 			_, err := os.Stat(cwd + file.Name() + string(os.PathSeparator) + "flash-all.sh")
 			if err != nil {
-				altosPath = file.Name()
+				calyxosPath = file.Name()
 			}
 		}
 	}
@@ -323,18 +323,18 @@ func flashDevices() {
 					return
 				}
 			}
-			os.Chdir(altosPath)
+			os.Chdir(calyxosPath)
 			flashCmd := exec.Command("")
 			if OS == "windows" {
 				flashCmd = exec.Command("./flash-all.bat")
 			} else {
 				flashCmd = exec.Command("./flash-all.sh")
 			}
-			fmt.Println("Flashing altOS on device " + device + "...")
+			fmt.Println("Flashing CalyxOS on device " + device + "...")
 			output, err := flashCmd.Output()
 			fmt.Printf("%s\n", output)
 			if err != nil {
-				errorln("Failed to flash altOS for device " + device)
+				errorln("Failed to flash CalyxOS for device " + device)
 				return
 			}
 			fmt.Println("Locking device " + device + " bootloader...")
