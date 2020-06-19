@@ -185,6 +185,8 @@ func prepareFactoryImage() {
 
 func getPlatformTools() error {
 	platformToolsPath := cwd + string(os.PathSeparator) + "platform-tools" + string(os.PathSeparator)
+	_ = os.RemoveAll(platformToolsPath)
+	_ = os.RemoveAll(PLATFORM_TOOLS_ZIP)
 	adbPath := platformToolsPath + "adb"
 	fastbootPath := platformToolsPath + "fastboot"
 	if OS == "windows" {
@@ -200,9 +202,10 @@ func getPlatformTools() error {
 	}
 	adb = exec.Command(adbPath)
 	fastboot = exec.Command(fastbootPath)
-	_, err := os.Stat(platformToolsPath)
-	if err == nil {
-		killAdb()
+	fmt.Println("Downloading platform tools: https://dl.google.com/android/repository/" + PLATFORM_TOOLS_ZIP)
+	err := downloadFile("https://dl.google.com/android/repository/" + PLATFORM_TOOLS_ZIP)
+	if err != nil {
+		return err
 	}
 	err = verifyPlatformToolsZip()
 	if err != nil {
@@ -210,18 +213,9 @@ func getPlatformTools() error {
 		return err
 	}
 	err = extractZip(PLATFORM_TOOLS_ZIP, cwd)
-	if err != nil {
-		fmt.Println("Downloading platform tools: https://dl.google.com/android/repository/" + PLATFORM_TOOLS_ZIP)
-		err = downloadFile("https://dl.google.com/android/repository/" + PLATFORM_TOOLS_ZIP)
-		if err != nil {
-			return err
-		}
-		err = verifyPlatformToolsZip()
-		if err != nil {
-			fmt.Println("Failed to verify " + PLATFORM_TOOLS_ZIP)
-			return err
-		}
-		err = extractZip(PLATFORM_TOOLS_ZIP, cwd)
+	_, err2 := os.Stat(platformToolsPath)
+	if err2 == nil {
+		killAdb()
 	}
 	return err
 }
