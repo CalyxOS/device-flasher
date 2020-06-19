@@ -114,7 +114,6 @@ func main() {
 	if OS == "linux" {
 		checkUdevRules()
 	}
-	fmt.Println("Do the following for each device:")
 	fmt.Println("Connect to a wifi network and ensure that no SIM cards are installed")
 	fmt.Println("Enable Developer Options on device (Settings -> About Phone -> tap \"Build number\" 7 times)")
 	fmt.Println("Enable USB debugging on device (Settings -> System -> Advanced -> Developer Options) and allow the computer to debug (hit \"OK\" on the popup when USB is connected)")
@@ -125,7 +124,7 @@ func main() {
 	if len(devices) == 0 {
 		getDevices(*fastboot)
 		if len(devices) == 0 {
-			fatalln(errors.New("No device connected. Exiting..."))
+			fatalln(errors.New("Device not connected. Exiting..."))
 		}
 	}
 	fmt.Println("Detected " + strconv.Itoa(len(devices)) + " devices: " + strings.Join(devices, ", "))
@@ -212,7 +211,7 @@ func getPlatformTools() error {
 	}
 	err = extractZip(PLATFORM_TOOLS_ZIP, cwd)
 	if err != nil {
-		fmt.Println("There are missing Android platform tools in PATH. Attempting to download https://dl.google.com/android/repository/" + PLATFORM_TOOLS_ZIP)
+		fmt.Println("Downloading platform tools: https://dl.google.com/android/repository/" + PLATFORM_TOOLS_ZIP)
 		err = downloadFile("https://dl.google.com/android/repository/" + PLATFORM_TOOLS_ZIP)
 		if err != nil {
 			return err
@@ -355,7 +354,7 @@ func flashDevices() {
 		}(device)
 	}
 	wg.Wait()
-	fmt.Println("Bulk flashing complete")
+	fmt.Println("Flashing complete")
 }
 
 func extractZip(src, dest string) error {
