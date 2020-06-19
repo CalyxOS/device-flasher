@@ -5,9 +5,7 @@ Prerequisites:
     Plug each device of a same model to a USB port
 
     The following files must be available in the current directory:
-        Device factory image (optional for pixel devices, will automatically attempt to download if unavailable)
-        CalyxOS device image
-        CalyxOS key
+        CalyxOS factory image
 
 Execution:
  On Windows:
