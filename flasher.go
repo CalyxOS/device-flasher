@@ -58,12 +58,13 @@ var fastboot *exec.Cmd
 
 var input string
 
-var altosKey string
+var AVBkey string
 var factoryZip string
 var bootloader string
 var radio string
 var image string
 var device string
+var devices []string
 
 var (
 	Warn  = Yellow
@@ -280,7 +281,7 @@ func getPrerequisiteFiles() {
 				factoryZip = file
 			}
 		} else if strings.HasSuffix(file, ".bin") {
-			altosKey = file
+			AVBkey = file
 		}
 	}
 }
@@ -305,7 +306,7 @@ func flashDevices(devices []string) {
 			}
 			platformToolCommand = *fastboot
 			err := errors.New("")
-			fmt.Println("Flashing altOS on device " + device + "...")
+			fmt.Println("Flashing device " + device + "...")
 			platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "--slot", "all", "flash", "bootloader", bootloader)
 			platformToolCommand.Stderr = os.Stderr
 			err = platformToolCommand.Run()
@@ -332,7 +333,7 @@ func flashDevices(devices []string) {
 			platformToolCommand.Stderr = os.Stderr
 			err = platformToolCommand.Run()
 			if err != nil {
-				errorln("Failed to flash altOS on device " + device)
+				errorln("Failed to flash device " + device)
 				return
 			}
 			fmt.Println("Wiping userdata for device " + device + "...")
@@ -343,7 +344,7 @@ func flashDevices(devices []string) {
 				errorln("Failed to wipe userdata for device " + device)
 				return
 			}
-			if altosKey != "" {
+			if AVBkey != "" {
 				fmt.Println("Locking device " + device + " bootloader...")
 				platformToolCommand := *fastboot
 				platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "erase", "avb_custom_key")
@@ -353,7 +354,7 @@ func flashDevices(devices []string) {
 					return
 				}
 				platformToolCommand = *fastboot
-				platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "flash", "avb_custom_key", altosKey)
+				platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "flash", "avb_custom_key", AVBkey)
 				err = platformToolCommand.Run()
 				if err != nil {
 					errorln("Failed to flash avb_custom_key for device " + device)

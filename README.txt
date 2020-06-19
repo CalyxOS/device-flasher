@@ -6,21 +6,21 @@ Prerequisites:
 
     The following files must be available in the current directory:
         Device factory image (optional for pixel devices, will automatically attempt to download if unavailable)
-        altOS device image
-        altOS key
+        CalyxOS device image
+        CalyxOS key
 
 Execution:
  On Windows:
-    Double-click on altOS-flasher_windows.exe (will not show error output)
+    Double-click on CalyxOS-flasher_windows.exe (will not show error output)
     or 
     Open PowerShell or Command Line
-    Type: .\altOS-flasher_windows.exe
+    Type: .\CalyxOS-flasher_windows.exe
     Press enter
  On Linux:
     Open a terminal in the current directory
-    Type: sudo ./altOS-flasher_linux
+    Type: sudo ./CalyxOS-flasher_linux
     Press enter
  On Mac:
     Open a terminal in the current directory
-    Type: ./altOS-flasher_darwin
+    Type: ./CalyxOS-flasher_darwin
     Press enter
