@@ -64,7 +64,6 @@ var bootloader string
 var radio string
 var image string
 var device string
-var devices []string
 
 var (
 	Warn  = Yellow
@@ -85,8 +84,8 @@ func Color(color string) func(...interface{}) string {
 
 func fatalln(err error) {
 	log, _ := os.OpenFile("error.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
-	_, _ = fmt.Fprintln(os.Stderr, Error(err.Error()))
 	_, _ = fmt.Fprintln(log, err.Error())
+	_, _ = fmt.Fprintln(os.Stderr, Error(err.Error()))
 	log.Close()
 	cleanup()
 	os.Exit(1)
@@ -180,7 +179,7 @@ func getPlatformTools() error {
 	}
 	adb = exec.Command(adbPath)
 	fastboot = exec.Command(fastbootPath)
-	_, err := os.Stat(platformToolsPath)
+	_, err := os.Stat(PLATFORM_TOOLS_ZIP)
 	if err == nil {
 		killAdb()
 		err = verifyPlatformToolsZip()
