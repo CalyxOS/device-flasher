@@ -182,7 +182,7 @@ func getPlatformTools() error {
 	fastboot = exec.Command(fastbootPath)
 	_, err := os.Stat(PLATFORM_TOOLS_ZIP)
 	if err == nil {
-		killAdb()
+		killPlatformTools()
 		err = verifyPlatformToolsZip()
 	}
 	if err != nil {
@@ -380,12 +380,15 @@ func flashDevices(devices []string) {
 	fmt.Println("Bulk flashing complete")
 }
 
-func killAdb() {
+func killPlatformTools() {
 	platformToolCommand := *adb
 	platformToolCommand.Args = append(platformToolCommand.Args, "kill-server")
 	err := platformToolCommand.Run()
 	if err != nil {
 		errorln(err.Error())
+	}
+	if OS == "windows" {
+		_ = exec.Command("taskkill", "/IM", "fastboot.exe", "/F").Run()
 	}
 }
 
