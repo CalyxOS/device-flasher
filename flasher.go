@@ -58,8 +58,7 @@ var fastboot *exec.Cmd
 
 var input string
 
-var AVBkey string
-var factoryZip string
+var avb string
 var bootloader string
 var radio string
 var image string
@@ -142,27 +141,29 @@ func main() {
 			fatalln(errors.New("Cannot determine device model. Exiting..."))
 		}
 	}
-	getPrerequisiteFiles()
-	err = extractZip(path.Base(factoryZip), cwd)
+	factoryFolder := getFactoryFiles(true)
+	err = extractZip(path.Base(factoryFolder), cwd)
 	if err != nil {
 		errorln("Cannot continue without the device factory image. Exiting...")
 		fatalln(err)
 	}
-	factoryZip = factoryZip[0:strings.Index(factoryZip, "-factory")]
-	factoryZip = cwd + string(os.PathSeparator) + factoryZip + string(os.PathSeparator)
-	files, err := ioutil.ReadDir(factoryZip)
+	factoryFolder = getFactoryFiles(false)
+	factoryFolder = cwd + string(os.PathSeparator) + factoryFolder + string(os.PathSeparator)
+	files, err := ioutil.ReadDir(factoryFolder)
 	if err != nil {
 		errorln("Cannot continue without the device factory image. Exiting...")
 		fatalln(err)
 	}
 	for _, file := range files {
 		file := file.Name()
-		if strings.Contains(file, "bootloader") {
-			bootloader = factoryZip + file
+		if strings.HasPrefix(file, "avb") && strings.HasSuffix(file, ".bin") {
+			avb = factoryFolder + file
+		} else if strings.Contains(file, "bootloader") {
+			bootloader = factoryFolder + file
 		} else if strings.Contains(file, "radio") {
-			radio = factoryZip + file
+			radio = factoryFolder + file
 		} else if strings.Contains(file, "image") {
-			image = factoryZip + file
+			image = factoryFolder + file
 		}
 	}
 	flashDevices(devices)
@@ -268,21 +269,22 @@ func getProp(prop string, device string) string {
 	return strings.Trim(string(out), "[]\n\r")
 }
 
-func getPrerequisiteFiles() {
+func getFactoryFiles(zip bool) string {
 	files, err := ioutil.ReadDir(cwd)
 	if err != nil {
 		fatalln(err)
 	}
 	for _, file := range files {
 		file := file.Name()
-		if strings.Contains(file, strings.ToLower(device)) && strings.HasSuffix(file, ".zip") {
-			if strings.Contains(file, "factory") {
-				factoryZip = file
+		if strings.Contains(file, strings.ToLower(device)) {
+			if strings.Contains(file, "factory") && strings.HasSuffix(file, ".zip") && zip {
+				return file
+			} else if !strings.HasSuffix(file, ".zip") && !zip {
+				return file
 			}
-		} else if strings.HasSuffix(file, ".bin") {
-			AVBkey = file
 		}
 	}
+	return ""
 }
 
 func flashDevices(devices []string) {
@@ -343,7 +345,7 @@ func flashDevices(devices []string) {
 				errorln("Failed to wipe userdata for device " + device)
 				return
 			}
-			if AVBkey != "" {
+			if avb != "" {
 				fmt.Println("Locking device " + device + " bootloader...")
 				platformToolCommand := *fastboot
 				platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "erase", "avb_custom_key")
@@ -353,7 +355,7 @@ func flashDevices(devices []string) {
 					return
 				}
 				platformToolCommand = *fastboot
-				platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "flash", "avb_custom_key", AVBkey)
+				platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "flash", "avb_custom_key", avb)
 				err = platformToolCommand.Run()
 				if err != nil {
 					errorln("Failed to flash avb_custom_key for device " + device)
