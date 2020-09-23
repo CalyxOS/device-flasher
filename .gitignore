@@ -7,6 +7,15 @@
 device-flasher.*
 CalyxOS-flasher_*
 
+# Jetbrains IDE configuration files
+.idea
+
+# Flasher input and outputs files
+platform-tools
+*factory*
+*.log
+*.zip
+
 # Test binary, built with `go test -c`
 *.test
 
