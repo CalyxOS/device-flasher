@@ -29,40 +29,40 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"reflect"
 	"runtime"
 	"strconv"
 	"strings"
 	"sync"
 )
 
+var input string
+
 var executable, _ = os.Executable()
 var cwd = filepath.Dir(executable)
 
-const OS = runtime.GOOS
-const PLATFORM_TOOLS_ZIP = "platform-tools_r30.0.2-" + OS + ".zip"
+var adb *exec.Cmd
+var fastboot *exec.Cmd
 
-const (
-	LINUX_SHA256   = "f7306a7c66d8149c4430aff270d6ed644c720ea29ef799dc613d3dc537485c6e"
-	DARWIN_SHA256  = "ab9dbab873fff677deb2cfd95ea60b9295ebd53b58ec8533e9e1110b2451e540"
-	WINDOWS_SHA256 = "265dd7b55f58dff1a5ad5073a92f4a5308bd070b72bd8b0d604674add6db8a41"
-)
+var platformToolsVersion = "30.0.4"
+var platformToolsZip string
+
+var factoryFiles map[string]FactoryImage
+
+type FactoryImage struct {
+	avb        string
+	bootloader string
+	radio      string
+	image      string
+}
+
+const OS = runtime.GOOS
 
 const (
 	UDEV_RULES = "# Google\nSUBSYSTEM==\"usb\", ATTR{idVendor}==\"18d1\", GROUP=\"sudo\"\n# Xiaomi\nSUBSYSTEM==\"usb\", ATTR{idVendor}==\"2717\", GROUP=\"sudo\"\n"
 	RULES_FILE = "98-device-flasher.rules"
 	RULES_PATH = "/etc/udev/rules.d2/"
 )
-
-var adb *exec.Cmd
-var fastboot *exec.Cmd
-
-var input string
-
-var avb string
-var bootloader string
-var radio string
-var image string
-var device string
 
 var (
 	Warn  = Yellow
@@ -106,6 +106,11 @@ func cleanup() {
 
 func main() {
 	_ = os.Remove("error.log")
+	factoryFiles = getFactoryFiles()
+	if len(factoryFiles) < 1 {
+		fatalln(errors.New("Cannot continue without a device factory image. Exiting..."))
+	}
+	platformToolsZip = "platform-tools_r" + platformToolsVersion + "-" + OS + ".zip"
 	err := getPlatformTools()
 	if err != nil {
 		errorln("Cannot continue without Android platform tools. Exiting...")
@@ -128,44 +133,12 @@ func main() {
 	fmt.Println("Enable OEM Unlocking (in the same Developer Options menu)")
 	fmt.Print("When done, press enter to continue")
 	_, _ = fmt.Scanln(&input)
-	devices := getDevices(*adb)
-	devices = append(devices, getDevices(*fastboot)...)
+	devices := getDevices()
 	if len(devices) == 0 {
 		fatalln(errors.New("No device connected. Exiting..."))
 	}
-	fmt.Println("Detected " + strconv.Itoa(len(devices)) + " devices: " + strings.Join(devices, ", "))
-	device = getProp("ro.product.device", devices[0])
-	if device == "" {
-		device = getVar("product", devices[0])
-		if device == "" {
-			fatalln(errors.New("Cannot determine device model. Exiting..."))
-		}
-	}
-	factoryFolder := getFactoryFiles(true)
-	err = extractZip(path.Base(factoryFolder), cwd)
-	if err != nil {
-		errorln("Cannot continue without the device factory image. Exiting...")
-		fatalln(err)
-	}
-	factoryFolder = getFactoryFiles(false)
-	factoryFolder = cwd + string(os.PathSeparator) + factoryFolder + string(os.PathSeparator)
-	files, err := ioutil.ReadDir(factoryFolder)
-	if err != nil {
-		errorln("Cannot continue without the device factory image. Exiting...")
-		fatalln(err)
-	}
-	for _, file := range files {
-		file := file.Name()
-		if strings.HasPrefix(file, "avb") && strings.HasSuffix(file, ".bin") {
-			avb = factoryFolder + file
-		} else if strings.Contains(file, "bootloader") {
-			bootloader = factoryFolder + file
-		} else if strings.Contains(file, "radio") {
-			radio = factoryFolder + file
-		} else if strings.Contains(file, "image") {
-			image = factoryFolder + file
-		}
-	}
+	fmt.Print("Detected " + strconv.Itoa(len(devices)) + " devices: ")
+	fmt.Println(reflect.ValueOf(devices).MapKeys())
 	flashDevices(devices)
 	defer cleanup()
 }
@@ -180,24 +153,37 @@ func getPlatformTools() error {
 	}
 	adb = exec.Command(adbPath)
 	fastboot = exec.Command(fastbootPath)
-	_, err := os.Stat(PLATFORM_TOOLS_ZIP)
+	platformToolsChecksum := map[string]string{
+		"platform-tools_r29.0.6-darwin.zip":  "7555e8e24958cae4cfd197135950359b9fe8373d4862a03677f089d215119a3a",
+		"platform-tools_r29.0.6-linux.zip":   "cc9e9d0224d1a917bad71fe12d209dfffe9ce43395e048ab2f07dcfc21101d44",
+		"platform-tools_r29.0.6-windows.zip": "247210e3c12453545f8e1f76e55de3559c03f2d785487b2e4ac00fe9698a039c",
+		"platform-tools_r30.0.4-darwin.zip":  "e0db2bdc784c41847f854d6608e91597ebc3cef66686f647125f5a046068a890",
+		"platform-tools_r30.0.4-linux.zip":   "5be24ed897c7e061ba800bfa7b9ebb4b0f8958cc062f4b2202701e02f2725891",
+		"platform-tools_r30.0.4-windows.zip": "413182fff6c5957911e231b9e97e6be4fc6a539035e3dfb580b5c54bd5950fee",
+	}
+	_, err := os.Stat(platformToolsZip)
 	if err == nil {
 		killPlatformTools()
-		err = verifyPlatformToolsZip()
+		err = verifyZip(platformToolsZip, platformToolsChecksum[platformToolsZip])
 	}
 	if err != nil {
-		fmt.Println("Downloading https://dl.google.com/android/repository/" + PLATFORM_TOOLS_ZIP)
-		err = downloadFile("https://dl.google.com/android/repository/" + PLATFORM_TOOLS_ZIP)
+		url := "https://dl.google.com/android/repository/"
+		if OS == "darwin" {
+			url += "fbad467867e935dce68a0296b00e6d1e76f15b15."
+		}
+		url += platformToolsZip
+		fmt.Println("Downloading " + url)
+		err = downloadFile(url)
 		if err != nil {
 			return err
 		}
-		err = verifyPlatformToolsZip()
+		err = verifyZip(platformToolsZip, platformToolsChecksum[platformToolsZip])
 		if err != nil {
-			fmt.Println(PLATFORM_TOOLS_ZIP + " checksum verification failed")
+			fmt.Println(platformToolsZip + " checksum verification failed")
 			return err
 		}
 	}
-	err = extractZip(PLATFORM_TOOLS_ZIP, cwd)
+	_, err = extractZip(platformToolsZip, cwd)
 	return err
 }
 
@@ -227,17 +213,27 @@ func checkUdevRules() {
 	}
 }
 
-func getDevices(platformToolCommand exec.Cmd) []string {
-	platformToolCommand.Args = append(adb.Args, "devices")
-	output, _ := platformToolCommand.Output()
-	lines := strings.Split(string(output), "\n")
-	devices := make([]string, 0)
-	if platformToolCommand.Path == adb.Path {
-		lines = lines[1:]
-	}
-	for i, device := range lines {
-		if lines[i] != "" && lines[i] != "\r" {
-			devices = append(devices, strings.Split(device, "\t")[0])
+func getDevices() map[string]string {
+	devices := map[string]string{}
+	for _, platformToolCommand := range []exec.Cmd{*adb, *fastboot} {
+		platformToolCommand.Args = append(platformToolCommand.Args, "devices")
+		output, _ := platformToolCommand.Output()
+		lines := strings.Split(string(output), "\n")
+		if platformToolCommand.Path == adb.Path {
+			lines = lines[1:]
+		}
+		for i, device := range lines {
+			if lines[i] != "" && lines[i] != "\r" {
+				serialNumber := strings.Split(device, "\t")[0]
+				if platformToolCommand.Path == adb.Path {
+					device = getProp("ro.product.device", serialNumber)
+				} else if platformToolCommand.Path == fastboot.Path {
+					device = getVar("product", serialNumber)
+				}
+				if _, ok := factoryFiles[device]; ok {
+					devices[serialNumber] = device
+				}
+			}
 		}
 	}
 	return devices
@@ -245,7 +241,7 @@ func getDevices(platformToolCommand exec.Cmd) []string {
 
 func getVar(prop string, device string) string {
 	platformToolCommand := *fastboot
-	platformToolCommand.Args = append(adb.Args, "-s", device, "getvar", prop)
+	platformToolCommand.Args = append(fastboot.Args, "-s", device, "getvar", prop)
 	out, err := platformToolCommand.CombinedOutput()
 	if err != nil {
 		return ""
@@ -269,112 +265,133 @@ func getProp(prop string, device string) string {
 	return strings.Trim(string(out), "[]\n\r")
 }
 
-func getFactoryFiles(zip bool) string {
+func getFactoryFiles() map[string]FactoryImage {
 	files, err := ioutil.ReadDir(cwd)
 	if err != nil {
 		fatalln(err)
 	}
+	factoryFiles := map[string]FactoryImage{}
 	for _, file := range files {
 		file := file.Name()
-		if strings.Contains(file, strings.ToLower(device)) {
-			if strings.Contains(file, "factory") && strings.HasSuffix(file, ".zip") && zip {
-				return file
-			} else if !strings.HasSuffix(file, ".zip") && !zip {
-				return file
+		if strings.Contains(file, "factory") && strings.HasSuffix(file, ".zip") {
+			if strings.HasPrefix(file, "jasmine") {
+				platformToolsVersion = "29.0.6"
 			}
+			extracted, err := extractZip(path.Base(file), cwd)
+			if err != nil {
+				errorln("Cannot continue without the device factory image. Exiting...")
+				fatalln(err)
+			}
+			factoryImage := FactoryImage{
+				avb:        "",
+				bootloader: "",
+				radio:      "",
+				image:      "",
+			}
+			for _, file := range extracted {
+				if strings.Contains(file, "avb") && strings.HasSuffix(file, ".bin") {
+					factoryImage.avb = file
+				} else if strings.Contains(file, "bootloader") {
+					factoryImage.bootloader = file
+				} else if strings.Contains(file, "radio") {
+					factoryImage.radio = file
+				} else if strings.Contains(file, "image") {
+					factoryImage.image = file
+				}
+			}
+			factoryFiles[strings.Split(file, "-")[0]] = factoryImage
 		}
 	}
-	return ""
+	return factoryFiles
 }
 
-func flashDevices(devices []string) {
+func flashDevices(devices map[string]string) {
 	var wg sync.WaitGroup
-	for _, device := range devices {
+	for serialNumber, device := range devices {
 		wg.Add(1)
-		go func(device string) {
+		go func(serialNumber, device string) {
 			defer wg.Done()
 			platformToolCommand := *adb
-			platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "reboot", "bootloader")
+			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "reboot", "bootloader")
 			_ = platformToolCommand.Run()
-			fmt.Println("Unlocking device " + device + " bootloader...")
+			fmt.Println("Unlocking device " + serialNumber + " bootloader...")
 			fmt.Println("Please use the volume and power keys on the device to confirm.")
 			platformToolCommand = *fastboot
-			platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "flashing", "unlock")
+			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "unlock")
 			_ = platformToolCommand.Run()
-			if getVar("unlocked", device) != "yes" {
-				errorln("Failed to unlock device " + device + " bootloader")
+			if getVar("unlocked", serialNumber) != "yes" {
+				errorln("Failed to unlock device " + serialNumber + " bootloader")
 				return
 			}
 			platformToolCommand = *fastboot
-			err := errors.New("")
-			fmt.Println("Flashing device " + device + "...")
-			platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "--slot", "all", "flash", "bootloader", bootloader)
+			fmt.Println("Flashing device " + serialNumber + "...")
+			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "--slot", "all", "flash", "bootloader", factoryFiles[device].bootloader)
+			platformToolCommand.Stderr = os.Stderr
+			err := platformToolCommand.Run()
+			if err != nil {
+				errorln("Failed to flash stock bootloader on device " + serialNumber)
+				return
+			}
+			platformToolCommand = *fastboot
+			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "reboot-bootloader")
+			_ = platformToolCommand.Run()
+			platformToolCommand = *fastboot
+			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "--slot", "all", "flash", "radio", factoryFiles[device].radio)
 			platformToolCommand.Stderr = os.Stderr
 			err = platformToolCommand.Run()
 			if err != nil {
-				errorln("Failed to flash stock bootloader on device " + device)
+				errorln("Failed to flash stock radio on device " + serialNumber)
 				return
 			}
 			platformToolCommand = *fastboot
-			platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "reboot-bootloader")
+			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "reboot-bootloader")
 			_ = platformToolCommand.Run()
 			platformToolCommand = *fastboot
-			platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "--slot", "all", "flash", "radio", radio)
+			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "--skip-reboot", "update", factoryFiles[device].image)
 			platformToolCommand.Stderr = os.Stderr
 			err = platformToolCommand.Run()
 			if err != nil {
-				errorln("Failed to flash stock radio on device " + device)
+				errorln("Failed to flash device " + serialNumber)
 				return
 			}
+			fmt.Println("Wiping userdata for device " + serialNumber + "...")
 			platformToolCommand = *fastboot
-			platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "reboot-bootloader")
-			_ = platformToolCommand.Run()
-			platformToolCommand = *fastboot
-			platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "--skip-reboot", "update", image)
-			platformToolCommand.Stderr = os.Stderr
+			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "-w", "reboot-bootloader")
 			err = platformToolCommand.Run()
 			if err != nil {
-				errorln("Failed to flash device " + device)
+				errorln("Failed to wipe userdata for device " + serialNumber)
 				return
 			}
-			fmt.Println("Wiping userdata for device " + device + "...")
-			platformToolCommand = *fastboot
-			platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "-w", "reboot-bootloader")
-			err = platformToolCommand.Run()
-			if err != nil {
-				errorln("Failed to wipe userdata for device " + device)
-				return
-			}
-			if avb != "" {
-				fmt.Println("Locking device " + device + " bootloader...")
+			if factoryFiles[device].avb != "" {
+				fmt.Println("Locking device " + serialNumber + " bootloader...")
 				platformToolCommand := *fastboot
-				platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "erase", "avb_custom_key")
+				platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "erase", "avb_custom_key")
 				err := platformToolCommand.Run()
 				if err != nil {
-					errorln("Failed to erase avb_custom_key for device " + device)
+					errorln("Failed to erase avb_custom_key for device " + serialNumber)
 					return
 				}
 				platformToolCommand = *fastboot
-				platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "flash", "avb_custom_key", avb)
+				platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flash", "avb_custom_key", factoryFiles[device].avb)
 				err = platformToolCommand.Run()
 				if err != nil {
-					errorln("Failed to flash avb_custom_key for device " + device)
+					errorln("Failed to flash avb_custom_key for device " + serialNumber)
 					return
 				}
 				fmt.Println("Please use the volume and power keys on the device to confirm.")
 				platformToolCommand = *fastboot
-				platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "flashing", "lock")
+				platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "lock")
 				_ = platformToolCommand.Run()
-				if getVar("unlocked", device) != "no" {
-					errorln("Failed to lock device " + device + " bootloader")
+				if getVar("unlocked", serialNumber) != "no" {
+					errorln("Failed to lock device " + serialNumber + " bootloader")
 					return
 				}
 			}
-			fmt.Println("Rebooting " + device + "...")
+			fmt.Println("Rebooting " + serialNumber + "...")
 			platformToolCommand = *fastboot
-			platformToolCommand.Args = append(platformToolCommand.Args, "-s", device, "reboot")
+			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "reboot")
 			_ = platformToolCommand.Start()
-		}(device)
+		}(serialNumber, device)
 	}
 	wg.Wait()
 	fmt.Println("Bulk flashing complete")
@@ -411,67 +428,45 @@ func downloadFile(url string) error {
 	return err
 }
 
-func extractZip(src, dest string) error {
-	dest = filepath.Clean(dest) + string(os.PathSeparator)
-
+func extractZip(src string, destination string) ([]string, error) {
+	var filenames []string
 	r, err := zip.OpenReader(src)
 	if err != nil {
-		return err
+		return filenames, err
 	}
-	defer func() {
-		if err := r.Close(); err != nil {
-			panic(err)
-		}
-	}()
-
-	os.MkdirAll(dest, 0755)
-
-	extractAndWriteFile := func(f *zip.File) error {
-		path := filepath.Join(dest, f.Name)
-		if !strings.HasPrefix(path, dest) {
-			return fmt.Errorf("%s: illegal file path", path)
-		}
-
-		rc, err := f.Open()
-		if err != nil {
-			return err
-		}
-		defer func() {
-			if err := rc.Close(); err != nil {
-				panic(err)
-			}
-		}()
-
-		if f.FileInfo().IsDir() {
-			os.MkdirAll(path, 0755)
-		} else {
-			os.MkdirAll(filepath.Dir(path), 0755)
-			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0755)
-			if err != nil {
-				return err
-			}
-			defer func() {
-				if err := f.Close(); err != nil {
-					panic(err)
-				}
-			}()
-
-			_, err = io.Copy(f, rc)
-			if err != nil {
-				return err
-			}
-		}
-		return nil
-	}
+	defer r.Close()
 
 	for _, f := range r.File {
-		err := extractAndWriteFile(f)
+		fpath := filepath.Join(destination, f.Name)
+		if !strings.HasPrefix(fpath, filepath.Clean(destination)+string(os.PathSeparator)) {
+			return filenames, fmt.Errorf("%s is an illegal filepath", fpath)
+		}
+		filenames = append(filenames, fpath)
+		if f.FileInfo().IsDir() {
+			os.MkdirAll(fpath, os.ModePerm)
+			continue
+		}
+		if err = os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
+			return filenames, err
+		}
+		outFile, err := os.OpenFile(fpath,
+			os.O_WRONLY|os.O_CREATE|os.O_TRUNC,
+			f.Mode())
 		if err != nil {
-			return err
+			return filenames, err
+		}
+		rc, err := f.Open()
+		if err != nil {
+			return filenames, err
+		}
+		_, err = io.Copy(outFile, rc)
+		outFile.Close()
+		rc.Close()
+		if err != nil {
+			return filenames, err
 		}
 	}
-
-	return nil
+	return filenames, nil
 }
 
 func verifyZip(zipfile, sha256sum string) error {
@@ -490,20 +485,6 @@ func verifyZip(zipfile, sha256sum string) error {
 		return nil
 	}
 	return errors.New("sha256sum mismatch")
-}
-
-func verifyPlatformToolsZip() error {
-	zipfile := PLATFORM_TOOLS_ZIP
-	switch OS {
-	case "linux":
-		return verifyZip(zipfile, LINUX_SHA256)
-	case "darwin":
-		return verifyZip(zipfile, DARWIN_SHA256)
-	case "windows":
-		return verifyZip(zipfile, WINDOWS_SHA256)
-	default:
-		return errors.New("Unknown platform")
-	}
 }
 
 type WriteCounter struct {
