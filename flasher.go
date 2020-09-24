@@ -132,6 +132,8 @@ func main() {
 	}
 	fmt.Print("Detected " + strconv.Itoa(len(devices)) + " devices: ")
 	fmt.Println(reflect.ValueOf(devices).MapKeys())
+	fmt.Print("Press enter to continue")
+	_, _ = fmt.Scanln(&input)
 	flashDevices(devices)
 	defer cleanup()
 }
