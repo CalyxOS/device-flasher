@@ -47,14 +47,7 @@ var fastboot *exec.Cmd
 var platformToolsVersion = "30.0.4"
 var platformToolsZip string
 
-var factoryFiles map[string]FactoryImage
-
-type FactoryImage struct {
-	avb        string
-	bootloader string
-	radio      string
-	image      string
-}
+var deviceFactoryFolderMap map[string]string
 
 const OS = runtime.GOOS
 
@@ -106,8 +99,8 @@ func cleanup() {
 
 func main() {
 	_ = os.Remove("error.log")
-	factoryFiles = getFactoryFiles()
-	if len(factoryFiles) < 1 {
+	deviceFactoryFolderMap = getFactoryFolder()
+	if len(deviceFactoryFolderMap) < 1 {
 		fatalln(errors.New("Cannot continue without a device factory image. Exiting..."))
 	}
 	platformToolsZip = "platform-tools_r" + platformToolsVersion + "-" + OS + ".zip"
@@ -229,7 +222,7 @@ func getDevices() map[string]string {
 				} else if platformToolCommand.Path == fastboot.Path {
 					device = getVar("product", serialNumber)
 				}
-				if _, ok := factoryFiles[device]; ok {
+				if _, ok := deviceFactoryFolderMap[device]; ok {
 					devices[serialNumber] = device
 				}
 			}
@@ -264,12 +257,12 @@ func getProp(prop string, device string) string {
 	return strings.Trim(string(out), "[]\n\r")
 }
 
-func getFactoryFiles() map[string]FactoryImage {
+func getFactoryFolder() map[string]string {
 	files, err := ioutil.ReadDir(cwd)
 	if err != nil {
 		fatalln(err)
 	}
-	factoryFiles := map[string]FactoryImage{}
+	factoryFiles := map[string]string{}
 	var wg sync.WaitGroup
 	for _, file := range files {
 		file := file.Name()
@@ -285,24 +278,7 @@ func getFactoryFiles() map[string]FactoryImage {
 					errorln("Cannot continue without the device factory image. Exiting...")
 					fatalln(err)
 				}
-				factoryImage := FactoryImage{
-					avb:        "",
-					bootloader: "",
-					radio:      "",
-					image:      "",
-				}
-				for _, file := range extracted {
-					if strings.Contains(file, "avb") && strings.HasSuffix(file, ".bin") {
-						factoryImage.avb = file
-					} else if strings.Contains(file, "bootloader") {
-						factoryImage.bootloader = file
-					} else if strings.Contains(file, "radio") {
-						factoryImage.radio = file
-					} else if strings.Contains(file, "image") {
-						factoryImage.image = file
-					}
-				}
-				factoryFiles[strings.Split(file, "-")[0]] = factoryImage
+				factoryFiles[strings.Split(file, "-")[0]] = extracted[0]
 			}(file)
 		}
 	}
@@ -328,69 +304,28 @@ func flashDevices(devices map[string]string) {
 				errorln("Failed to unlock device " + serialNumber + " bootloader")
 				return
 			}
-			platformToolCommand = *fastboot
-			fmt.Println("Flashing device " + serialNumber + "...")
-			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "--slot", "all", "flash", "bootloader", factoryFiles[device].bootloader)
-			platformToolCommand.Stderr = os.Stderr
-			err := platformToolCommand.Run()
-			if err != nil {
-				errorln("Failed to flash stock bootloader on device " + serialNumber)
-				return
-			}
-			platformToolCommand = *fastboot
-			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "reboot-bootloader")
-			_ = platformToolCommand.Run()
-			platformToolCommand = *fastboot
-			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "--slot", "all", "flash", "radio", factoryFiles[device].radio)
-			platformToolCommand.Stderr = os.Stderr
-			err = platformToolCommand.Run()
-			if err != nil {
-				errorln("Failed to flash stock radio on device " + serialNumber)
-				return
-			}
-			platformToolCommand = *fastboot
-			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "reboot-bootloader")
-			_ = platformToolCommand.Run()
-			platformToolCommand = *fastboot
-			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "--skip-reboot", "update", factoryFiles[device].image)
-			platformToolCommand.Stderr = os.Stderr
-			err = platformToolCommand.Run()
-			if err != nil {
-				errorln("Failed to flash device " + serialNumber)
-				return
-			}
-			fmt.Println("Wiping userdata for device " + serialNumber + "...")
-			platformToolCommand = *fastboot
-			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "-w", "reboot-bootloader")
-			err = platformToolCommand.Run()
-			if err != nil {
-				errorln("Failed to wipe userdata for device " + serialNumber)
-				return
-			}
-			if factoryFiles[device].avb != "" {
-				fmt.Println("Locking device " + serialNumber + " bootloader...")
-				platformToolCommand := *fastboot
-				platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "erase", "avb_custom_key")
-				err := platformToolCommand.Run()
-				if err != nil {
-					errorln("Failed to erase avb_custom_key for device " + serialNumber)
-					return
+			flashAll := exec.Command("." + string(os.PathSeparator) + "flash-all" + func() string {
+				if OS == "windows" {
+					return ".bat"
+				} else {
+					return ".sh"
 				}
-				platformToolCommand = *fastboot
-				platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flash", "avb_custom_key", factoryFiles[device].avb)
-				err = platformToolCommand.Run()
-				if err != nil {
-					errorln("Failed to flash avb_custom_key for device " + serialNumber)
-					return
-				}
-				fmt.Println("Please use the volume and power keys on the device to confirm.")
-				platformToolCommand = *fastboot
-				platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "lock")
-				_ = platformToolCommand.Run()
-				if getVar("unlocked", serialNumber) != "no" {
-					errorln("Failed to lock device " + serialNumber + " bootloader")
-					return
-				}
+			}())
+			flashAll.Dir = deviceFactoryFolderMap[device]
+			flashAll.Stderr = os.Stderr
+			err := flashAll.Run()
+			if err != nil {
+				errorln(err.Error())
+				return
+			}
+			fmt.Println("Locking device " + serialNumber + " bootloader...")
+			fmt.Println("Please use the volume and power keys on the device to confirm.")
+			platformToolCommand = *fastboot
+			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "lock")
+			_ = platformToolCommand.Start()
+			if getVar("unlocked", serialNumber) != "no" {
+				errorln("Failed to lock device " + serialNumber + " bootloader")
+				return
 			}
 			fmt.Println("Rebooting " + serialNumber + "...")
 			platformToolCommand = *fastboot
@@ -399,7 +334,7 @@ func flashDevices(devices map[string]string) {
 		}(serialNumber, device)
 	}
 	wg.Wait()
-	fmt.Println("Bulk flashing complete")
+	fmt.Println("Flashing complete")
 }
 
 func killPlatformTools() {
