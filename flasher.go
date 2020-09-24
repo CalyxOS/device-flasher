@@ -128,7 +128,7 @@ func main() {
 	_, _ = fmt.Scanln(&input)
 	devices := getDevices()
 	if len(devices) == 0 {
-		fatalln(errors.New("No device connected. Exiting..."))
+		fatalln(errors.New("No devices detected. Exiting..."))
 	}
 	fmt.Print("Detected " + strconv.Itoa(len(devices)) + " devices: ")
 	fmt.Println(reflect.ValueOf(devices).MapKeys())
@@ -146,7 +146,15 @@ func getPlatformTools() error {
 	}
 	adb = exec.Command(adbPath)
 	fastboot = exec.Command(fastbootPath)
-	platformToolsChecksum := map[string]string{
+	plaformToolsUrlMap := map[string]string{
+		"platform-tools_r29.0.6-darwin.zip":  "https://dl.google.com/android/repository/platform-tools_r29.0.6-darwin.zip",
+		"platform-tools_r29.0.6-linux.zip":   "https://dl.google.com/android/repository/platform-tools_r29.0.6-linux.zip",
+		"platform-tools_r29.0.6-windows.zip": "https://dl.google.com/android/repository/platform-tools_r29.0.6-windows.zip",
+		"platform-tools_r30.0.4-darwin.zip":  "https://dl.google.com/android/repository/fbad467867e935dce68a0296b00e6d1e76f15b15.platform-tools_r30.0.4-darwin.zip",
+		"platform-tools_r30.0.4-linux.zip":   "https://dl.google.com/android/repository/platform-tools_r30.0.4-linux.zip",
+		"platform-tools_r30.0.4-windows.zip": "https://dl.google.com/android/repository/platform-tools_r30.0.4-windows.zip",
+	}
+	platformToolsChecksumMap := map[string]string{
 		"platform-tools_r29.0.6-darwin.zip":  "7555e8e24958cae4cfd197135950359b9fe8373d4862a03677f089d215119a3a",
 		"platform-tools_r29.0.6-linux.zip":   "cc9e9d0224d1a917bad71fe12d209dfffe9ce43395e048ab2f07dcfc21101d44",
 		"platform-tools_r29.0.6-windows.zip": "247210e3c12453545f8e1f76e55de3559c03f2d785487b2e4ac00fe9698a039c",
@@ -155,26 +163,18 @@ func getPlatformTools() error {
 		"platform-tools_r30.0.4-windows.zip": "413182fff6c5957911e231b9e97e6be4fc6a539035e3dfb580b5c54bd5950fee",
 	}
 	_, err := os.Stat(platformToolsZip)
-	if err == nil {
-		killPlatformTools()
-		err = verifyZip(platformToolsZip, platformToolsChecksum[platformToolsZip])
-	}
 	if err != nil {
-		url := "https://dl.google.com/android/repository/"
-		if OS == "darwin" {
-			url += "fbad467867e935dce68a0296b00e6d1e76f15b15."
-		}
-		url += platformToolsZip
-		err = downloadFile(url)
+		err = downloadFile(plaformToolsUrlMap[platformToolsZip])
 		if err != nil {
-			return err
-		}
-		err = verifyZip(platformToolsZip, platformToolsChecksum[platformToolsZip])
-		if err != nil {
-			fmt.Println(platformToolsZip + " checksum verification failed")
 			return err
 		}
 	}
+	err = verifyZip(platformToolsZip, platformToolsChecksumMap[platformToolsZip])
+	if err != nil {
+		fmt.Println(platformToolsZip + " checksum verification failed")
+		return err
+	}
+	killPlatformTools()
 	_, err = extractZip(platformToolsZip, cwd)
 	return err
 }
