@@ -58,8 +58,8 @@ const (
 )
 
 var (
-	Warn  = Yellow
 	Error = Red
+	Warn  = Yellow
 )
 
 var (
@@ -74,20 +74,19 @@ func Color(color string) func(...interface{}) string {
 	}
 }
 
-func fatalln(err error) {
+func errorln(err interface{}, fatal bool) {
 	log, _ := os.OpenFile("error.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
-	_, _ = fmt.Fprintln(log, err.Error())
-	_, _ = fmt.Fprintln(os.Stderr, Error(err.Error()))
-	log.Close()
-	cleanup()
-	os.Exit(1)
-}
-
-func errorln(err string) {
-	log, _ := os.OpenFile("error.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
-	defer log.Close()
 	_, _ = fmt.Fprintln(log, err)
 	_, _ = fmt.Fprintln(os.Stderr, Error(err))
+	log.Close()
+	if fatal {
+		cleanup()
+		os.Exit(1)
+	}
+}
+
+func warnln(warning interface{}) {
+	fmt.Println(Warn(warning))
 }
 
 func cleanup() {
@@ -99,16 +98,18 @@ func cleanup() {
 
 func main() {
 	_ = os.Remove("error.log")
-	deviceFactoryFolderMap = getFactoryFolder()
+	//Map device codenames to their corresponding extracted factory image folders
+	deviceFactoryFolderMap = getFactoryFolders()
 	if len(deviceFactoryFolderMap) < 1 {
-		fatalln(errors.New("Cannot continue without a device factory image. Exiting..."))
+		errorln(errors.New("Cannot continue without a device factory image. Exiting..."), true)
 	}
 	platformToolsZip = "platform-tools_r" + platformToolsVersion + "-" + OS + ".zip"
 	err := getPlatformTools()
 	if err != nil {
-		errorln("Cannot continue without Android platform tools. Exiting...")
-		fatalln(err)
+		errorln("Cannot continue without Android platform tools. Exiting...", false)
+		errorln(err, true)
 	}
+	//Linux weirdness
 	if OS == "linux" {
 		checkUdevRules()
 	}
@@ -116,24 +117,26 @@ func main() {
 	platformToolCommand.Args = append(adb.Args, "start-server")
 	err = platformToolCommand.Run()
 	if err != nil {
-		errorln("Cannot start ADB server")
-		fatalln(err)
+		errorln("Cannot start ADB server", false)
+		errorln(err, true)
 	}
-	fmt.Println("Do the following for each device:")
-	fmt.Println("Connect to a wifi network and ensure that no SIM cards are installed")
-	fmt.Println("Enable Developer Options on device (Settings -> About Phone -> tap \"Build number\" 7 times)")
-	fmt.Println("Enable USB debugging on device (Settings -> System -> Advanced -> Developer Options) and allow the computer to debug (hit \"OK\" on the popup when USB is connected)")
-	fmt.Println("Enable OEM Unlocking (in the same Developer Options menu)")
+	warnln("Do the following for each device:")
+	warnln("Connect to a wifi network and ensure that no SIM cards are installed")
+	warnln("Enable Developer Options on device (Settings -> About Phone -> tap \"Build number\" 7 times)")
+	warnln("Enable USB debugging on device (Settings -> System -> Advanced -> Developer Options) and allow the computer to debug (hit \"OK\" on the popup when USB is connected)")
+	warnln("Enable OEM Unlocking (in the same Developer Options menu)")
 	fmt.Print("When done, press enter to continue")
 	_, _ = fmt.Scanln(&input)
+	//Map serial numbers to device codenames by extracting them from adb and fastboot command output
 	devices := getDevices()
 	if len(devices) == 0 {
-		fatalln(errors.New("No devices detected. Exiting..."))
+		errorln(errors.New("No devices detected. Exiting..."), true)
 	}
-	fmt.Print("Detected " + strconv.Itoa(len(devices)) + " devices: ")
-	fmt.Println(reflect.ValueOf(devices).MapKeys())
+	fmt.Print(Warn("Detected " + strconv.Itoa(len(devices)) + " devices: "))
+	fmt.Println(Warn(reflect.ValueOf(devices).MapKeys()))
 	fmt.Print("Press enter to continue")
 	_, _ = fmt.Scanln(&input)
+	//Sequence: unlock bootloader -> flash all partitions -> relock bootloader
 	flashDevices(devices)
 	defer cleanup()
 }
@@ -176,6 +179,7 @@ func getPlatformTools() error {
 		fmt.Println(platformToolsZip + " checksum verification failed")
 		return err
 	}
+	//Ensure that no platform tools are running before attempting to overwrite them
 	killPlatformTools()
 	_, err = extractZip(platformToolsZip, cwd)
 	return err
@@ -186,21 +190,21 @@ func checkUdevRules() {
 	if os.IsNotExist(err) {
 		err = exec.Command("sudo", "mkdir", RULES_PATH).Run()
 		if err != nil {
-			errorln("Cannot continue without udev rules. Exiting...")
-			fatalln(err)
+			errorln("Cannot continue without udev rules. Exiting...", false)
+			errorln(err, true)
 		}
 		_, err = os.Stat(RULES_FILE)
 		if os.IsNotExist(err) {
 			err = ioutil.WriteFile(RULES_FILE, []byte(UDEV_RULES), 0644)
 			if err != nil {
-				errorln("Cannot continue without udev rules. Exiting...")
-				fatalln(err)
+				errorln("Cannot continue without udev rules. Exiting...", false)
+				errorln(err, true)
 			}
 		}
 		err = exec.Command("sudo", "cp", RULES_FILE, RULES_PATH).Run()
 		if err != nil {
-			errorln("Cannot continue without udev rules. Exiting...")
-			fatalln(err)
+			errorln("Cannot continue without udev rules. Exiting...", false)
+			errorln(err, true)
 		}
 		_ = exec.Command("sudo", "udevadm", "control", "--reload-rules").Run()
 		_ = exec.Command("sudo", "udevadm", "trigger").Run()
@@ -259,12 +263,12 @@ func getProp(prop string, device string) string {
 	return strings.Trim(string(out), "[]\n\r")
 }
 
-func getFactoryFolder() map[string]string {
+func getFactoryFolders() map[string]string {
 	files, err := ioutil.ReadDir(cwd)
 	if err != nil {
-		fatalln(err)
+		errorln(err, true)
 	}
-	factoryFiles := map[string]string{}
+	deviceFactoryFolderMap := map[string]string{}
 	var wg sync.WaitGroup
 	for _, file := range files {
 		file := file.Name()
@@ -277,15 +281,15 @@ func getFactoryFolder() map[string]string {
 				defer wg.Done()
 				extracted, err := extractZip(path.Base(file), cwd)
 				if err != nil {
-					errorln("Cannot continue without a factory image. Exiting...")
-					fatalln(err)
+					errorln("Cannot continue without a factory image. Exiting...", false)
+					errorln(err, true)
 				}
-				factoryFiles[strings.Split(file, "-")[0]] = extracted[0]
+				deviceFactoryFolderMap[strings.Split(file, "-")[0]] = extracted[0]
 			}(file)
 		}
 	}
 	wg.Wait()
-	return factoryFiles
+	return deviceFactoryFolderMap
 }
 
 func flashDevices(devices map[string]string) {
@@ -298,12 +302,12 @@ func flashDevices(devices map[string]string) {
 			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "reboot", "bootloader")
 			_ = platformToolCommand.Run()
 			fmt.Println("Unlocking " + device + " " + serialNumber + " bootloader...")
-			fmt.Println("Please use the volume and power keys on the device to confirm.")
+			warnln("Please use the volume and power keys on the device to confirm.")
 			platformToolCommand = *fastboot
 			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "unlock")
 			_ = platformToolCommand.Run()
 			if getVar("unlocked", serialNumber) != "yes" {
-				errorln("Failed to unlock " + device + " " + serialNumber + " bootloader")
+				errorln("Failed to unlock "+device+" "+serialNumber+" bootloader", false)
 				return
 			}
 			flashAll := exec.Command("." + string(os.PathSeparator) + "flash-all" + func() string {
@@ -317,12 +321,12 @@ func flashDevices(devices map[string]string) {
 			flashAll.Stderr = os.Stderr
 			err := flashAll.Run()
 			if err != nil {
-				errorln("Failed to flash " + device + " " + serialNumber)
-				errorln(err.Error())
+				errorln("Failed to flash "+device+" "+serialNumber, false)
+				errorln(err.Error(), false)
 				return
 			}
 			fmt.Println("Locking " + device + " " + serialNumber + " bootloader...")
-			fmt.Println("Please use the volume and power keys on the device to confirm.")
+			warnln("Please use the volume and power keys on the device to confirm.")
 			platformToolCommand = *fastboot
 			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "lock")
 			_ = platformToolCommand.Run()
@@ -341,7 +345,7 @@ func killPlatformTools() {
 	platformToolCommand.Args = append(platformToolCommand.Args, "kill-server")
 	err := platformToolCommand.Run()
 	if err != nil {
-		errorln(err.Error())
+		errorln(err.Error(), false)
 	}
 	if OS == "windows" {
 		_ = exec.Command("taskkill", "/IM", "fastboot.exe", "/F").Run()
