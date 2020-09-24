@@ -275,7 +275,7 @@ func getFactoryFolder() map[string]string {
 				defer wg.Done()
 				extracted, err := extractZip(path.Base(file), cwd)
 				if err != nil {
-					errorln("Cannot continue without the device factory image. Exiting...")
+					errorln("Cannot continue without a factory image. Exiting...")
 					fatalln(err)
 				}
 				factoryFiles[strings.Split(file, "-")[0]] = extracted[0]
@@ -295,13 +295,13 @@ func flashDevices(devices map[string]string) {
 			platformToolCommand := *adb
 			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "reboot", "bootloader")
 			_ = platformToolCommand.Run()
-			fmt.Println("Unlocking device " + serialNumber + " bootloader...")
+			fmt.Println("Unlocking " + device + " " + serialNumber + " bootloader...")
 			fmt.Println("Please use the volume and power keys on the device to confirm.")
 			platformToolCommand = *fastboot
 			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "unlock")
 			_ = platformToolCommand.Run()
 			if getVar("unlocked", serialNumber) != "yes" {
-				errorln("Failed to unlock device " + serialNumber + " bootloader")
+				errorln("Failed to unlock " + device + " " + serialNumber + " bootloader")
 				return
 			}
 			flashAll := exec.Command("." + string(os.PathSeparator) + "flash-all" + func() string {
@@ -315,19 +315,16 @@ func flashDevices(devices map[string]string) {
 			flashAll.Stderr = os.Stderr
 			err := flashAll.Run()
 			if err != nil {
+				errorln("Failed to flash " + device + " " + serialNumber)
 				errorln(err.Error())
 				return
 			}
-			fmt.Println("Locking device " + serialNumber + " bootloader...")
+			fmt.Println("Locking " + device + " " + serialNumber + " bootloader...")
 			fmt.Println("Please use the volume and power keys on the device to confirm.")
 			platformToolCommand = *fastboot
 			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "lock")
-			_ = platformToolCommand.Start()
-			if getVar("unlocked", serialNumber) != "no" {
-				errorln("Failed to lock device " + serialNumber + " bootloader")
-				return
-			}
-			fmt.Println("Rebooting " + serialNumber + "...")
+			_ = platformToolCommand.Run()
+			fmt.Println("Rebooting " + device + " " + serialNumber + "...")
 			platformToolCommand = *fastboot
 			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "reboot")
 			_ = platformToolCommand.Start()
