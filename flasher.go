@@ -172,7 +172,6 @@ func getPlatformTools() error {
 			url += "fbad467867e935dce68a0296b00e6d1e76f15b15."
 		}
 		url += platformToolsZip
-		fmt.Println("Downloading " + url)
 		err = downloadFile(url)
 		if err != nil {
 			return err
@@ -410,6 +409,7 @@ func killPlatformTools() {
 }
 
 func downloadFile(url string) error {
+	fmt.Println("Downloading " + url)
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
@@ -429,6 +429,7 @@ func downloadFile(url string) error {
 }
 
 func extractZip(src string, destination string) ([]string, error) {
+	fmt.Println("Extracting " + src)
 	var filenames []string
 	r, err := zip.OpenReader(src)
 	if err != nil {
@@ -470,6 +471,7 @@ func extractZip(src string, destination string) ([]string, error) {
 }
 
 func verifyZip(zipfile, sha256sum string) error {
+	fmt.Println("Verifying " + zipfile)
 	f, err := os.Open(zipfile)
 	if err != nil {
 		return err
