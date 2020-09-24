@@ -303,12 +303,15 @@ func flashDevices(devices map[string]string) {
 			_ = platformToolCommand.Run()
 			fmt.Println("Unlocking " + device + " " + serialNumber + " bootloader...")
 			warnln("Please use the volume and power keys on the device to confirm.")
-			platformToolCommand = *fastboot
-			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "unlock")
-			_ = platformToolCommand.Run()
-			if getVar("unlocked", serialNumber) != "yes" {
-				errorln("Failed to unlock "+device+" "+serialNumber+" bootloader", false)
-				return
+			for i := 0; getVar("unlocked", serialNumber) != "yes"; i++ {
+				platformToolCommand = *fastboot
+				platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "unlock")
+				err := platformToolCommand.Run()
+				if err != nil && i >= 2 {
+					errorln("Failed to unlock "+device+" "+serialNumber+" bootloader", false)
+					errorln(err, false)
+					return
+				}
 			}
 			flashAll := exec.Command("." + string(os.PathSeparator) + "flash-all" + func() string {
 				if OS == "windows" {
@@ -327,9 +330,16 @@ func flashDevices(devices map[string]string) {
 			}
 			fmt.Println("Locking " + device + " " + serialNumber + " bootloader...")
 			warnln("Please use the volume and power keys on the device to confirm.")
-			platformToolCommand = *fastboot
-			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "lock")
-			_ = platformToolCommand.Run()
+			for i := 0; getVar("unlocked", serialNumber) != "no"; i++ {
+				platformToolCommand = *fastboot
+				platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "lock")
+				err := platformToolCommand.Run()
+				if err != nil && i >= 2 {
+					errorln("Failed to lock "+device+" "+serialNumber+" bootloader", false)
+					errorln(err, false)
+					return
+				}
+			}
 			fmt.Println("Rebooting " + device + " " + serialNumber + "...")
 			platformToolCommand = *fastboot
 			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "reboot")
