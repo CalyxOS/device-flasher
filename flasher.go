@@ -270,37 +270,43 @@ func getFactoryFiles() map[string]FactoryImage {
 		fatalln(err)
 	}
 	factoryFiles := map[string]FactoryImage{}
+	var wg sync.WaitGroup
 	for _, file := range files {
 		file := file.Name()
 		if strings.Contains(file, "factory") && strings.HasSuffix(file, ".zip") {
 			if strings.HasPrefix(file, "jasmine") {
 				platformToolsVersion = "29.0.6"
 			}
-			extracted, err := extractZip(path.Base(file), cwd)
-			if err != nil {
-				errorln("Cannot continue without the device factory image. Exiting...")
-				fatalln(err)
-			}
-			factoryImage := FactoryImage{
-				avb:        "",
-				bootloader: "",
-				radio:      "",
-				image:      "",
-			}
-			for _, file := range extracted {
-				if strings.Contains(file, "avb") && strings.HasSuffix(file, ".bin") {
-					factoryImage.avb = file
-				} else if strings.Contains(file, "bootloader") {
-					factoryImage.bootloader = file
-				} else if strings.Contains(file, "radio") {
-					factoryImage.radio = file
-				} else if strings.Contains(file, "image") {
-					factoryImage.image = file
+			wg.Add(1)
+			go func(file string) {
+				defer wg.Done()
+				extracted, err := extractZip(path.Base(file), cwd)
+				if err != nil {
+					errorln("Cannot continue without the device factory image. Exiting...")
+					fatalln(err)
 				}
-			}
-			factoryFiles[strings.Split(file, "-")[0]] = factoryImage
+				factoryImage := FactoryImage{
+					avb:        "",
+					bootloader: "",
+					radio:      "",
+					image:      "",
+				}
+				for _, file := range extracted {
+					if strings.Contains(file, "avb") && strings.HasSuffix(file, ".bin") {
+						factoryImage.avb = file
+					} else if strings.Contains(file, "bootloader") {
+						factoryImage.bootloader = file
+					} else if strings.Contains(file, "radio") {
+						factoryImage.radio = file
+					} else if strings.Contains(file, "image") {
+						factoryImage.image = file
+					}
+				}
+				factoryFiles[strings.Split(file, "-")[0]] = factoryImage
+			}(file)
 		}
 	}
+	wg.Wait()
 	return factoryFiles
 }
 
