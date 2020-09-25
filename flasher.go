@@ -105,7 +105,7 @@ func cleanup() {
 func main() {
 	defer cleanup()
 	_ = os.Remove("error.log")
-	fmt.Println("Android Flash Tool v" + version)
+	fmt.Println("Android Factory Image Flasher version " + version)
 	// Map device codenames to their corresponding extracted factory image folders
 	deviceFactoryFolderMap = getFactoryFolders()
 	if len(deviceFactoryFolderMap) < 1 {
