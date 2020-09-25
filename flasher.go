@@ -227,6 +227,9 @@ func getDevices() map[string]string {
 					device = getProp("ro.product.device", serialNumber)
 				} else if platformToolCommand.Path == fastboot.Path {
 					device = getVar("product", serialNumber)
+					if device == "jasmine" {
+						device += "_sprout"
+					}
 				}
 				if _, ok := deviceFactoryFolderMap[device]; ok {
 					devices[serialNumber] = device
