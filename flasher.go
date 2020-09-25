@@ -51,6 +51,8 @@ var deviceFactoryFolderMap map[string]string
 
 const OS = runtime.GOOS
 
+const VERSION = "1.0.0"
+
 const (
 	UDEV_RULES = "# Google\nSUBSYSTEM==\"usb\", ATTR{idVendor}==\"18d1\", GROUP=\"sudo\"\n# Xiaomi\nSUBSYSTEM==\"usb\", ATTR{idVendor}==\"2717\", GROUP=\"sudo\"\n"
 	RULES_FILE = "98-device-flasher.rules"
@@ -98,7 +100,8 @@ func cleanup() {
 
 func main() {
 	_ = os.Remove("error.log")
-	//Map device codenames to their corresponding extracted factory image folders
+	fmt.Println("Android Flash Tool v" + VERSION)
+	// Map device codenames to their corresponding extracted factory image folders
 	deviceFactoryFolderMap = getFactoryFolders()
 	if len(deviceFactoryFolderMap) < 1 {
 		errorln(errors.New("Cannot continue without a device factory image. Exiting..."), true)
@@ -109,8 +112,8 @@ func main() {
 		errorln("Cannot continue without Android platform tools. Exiting...", false)
 		errorln(err, true)
 	}
-	//Linux weirdness
 	if OS == "linux" {
+		// Linux weirdness
 		checkUdevRules()
 	}
 	platformToolCommand := *adb
@@ -120,14 +123,13 @@ func main() {
 		errorln("Cannot start ADB server", false)
 		errorln(err, true)
 	}
-	warnln("Do the following for each device:")
-	warnln("Connect to a wifi network and ensure that no SIM cards are installed")
-	warnln("Enable Developer Options on device (Settings -> About Phone -> tap \"Build number\" 7 times)")
-	warnln("Enable USB debugging on device (Settings -> System -> Advanced -> Developer Options) and allow the computer to debug (hit \"OK\" on the popup when USB is connected)")
-	warnln("Enable OEM Unlocking (in the same Developer Options menu)")
+	warnln("1. Connect to a wifi network and ensure that no SIM cards are installed")
+	warnln("2. Enable Developer Options on device (Settings -> About Phone -> tap \"Build number\" 7 times)")
+	warnln("3. Enable USB debugging on device (Settings -> System -> Advanced -> Developer Options) and allow the computer to debug (hit \"OK\" on the popup when USB is connected)")
+	warnln("4. Enable OEM Unlocking (in the same Developer Options menu)")
 	fmt.Print("When done, press enter to continue")
 	_, _ = fmt.Scanln(&input)
-	//Map serial numbers to device codenames by extracting them from adb and fastboot command output
+	// Map serial numbers to device codenames by extracting them from adb and fastboot command output
 	devices := getDevices()
 	if len(devices) == 0 {
 		errorln(errors.New("No devices detected. Exiting..."), true)
@@ -136,9 +138,38 @@ func main() {
 	fmt.Println(Warn(reflect.ValueOf(devices).MapKeys()))
 	fmt.Print("Press enter to continue")
 	_, _ = fmt.Scanln(&input)
-	//Sequence: unlock bootloader -> flash all partitions -> relock bootloader
+	// Sequence: unlock bootloader -> execute flash-all script -> relock bootloader
 	flashDevices(devices)
 	defer cleanup()
+}
+
+func getFactoryFolders() map[string]string {
+	files, err := ioutil.ReadDir(cwd)
+	if err != nil {
+		errorln(err, true)
+	}
+	deviceFactoryFolderMap := map[string]string{}
+	var wg sync.WaitGroup
+	for _, file := range files {
+		file := file.Name()
+		if strings.Contains(file, "factory") && strings.HasSuffix(file, ".zip") {
+			if strings.HasPrefix(file, "jasmine") {
+				platformToolsVersion = "29.0.6"
+			}
+			wg.Add(1)
+			go func(file string) {
+				defer wg.Done()
+				extracted, err := extractZip(path.Base(file), cwd)
+				if err != nil {
+					errorln("Cannot continue without a factory image. Exiting...", false)
+					errorln(err, true)
+				}
+				deviceFactoryFolderMap[strings.Split(file, "-")[0]] = extracted[0]
+			}(file)
+		}
+	}
+	wg.Wait()
+	return deviceFactoryFolderMap
 }
 
 func getPlatformTools() error {
@@ -179,7 +210,7 @@ func getPlatformTools() error {
 		fmt.Println(platformToolsZip + " checksum verification failed")
 		return err
 	}
-	//Ensure that no platform tools are running before attempting to overwrite them
+	// Ensure that no platform tools are running before attempting to overwrite them
 	killPlatformTools()
 	_, err = extractZip(platformToolsZip, cwd)
 	return err
@@ -266,35 +297,6 @@ func getProp(prop string, device string) string {
 	return strings.Trim(string(out), "[]\n\r")
 }
 
-func getFactoryFolders() map[string]string {
-	files, err := ioutil.ReadDir(cwd)
-	if err != nil {
-		errorln(err, true)
-	}
-	deviceFactoryFolderMap := map[string]string{}
-	var wg sync.WaitGroup
-	for _, file := range files {
-		file := file.Name()
-		if strings.Contains(file, "factory") && strings.HasSuffix(file, ".zip") {
-			if strings.HasPrefix(file, "jasmine") {
-				platformToolsVersion = "29.0.6"
-			}
-			wg.Add(1)
-			go func(file string) {
-				defer wg.Done()
-				extracted, err := extractZip(path.Base(file), cwd)
-				if err != nil {
-					errorln("Cannot continue without a factory image. Exiting...", false)
-					errorln(err, true)
-				}
-				deviceFactoryFolderMap[strings.Split(file, "-")[0]] = extracted[0]
-			}(file)
-		}
-	}
-	wg.Wait()
-	return deviceFactoryFolderMap
-}
-
 func flashDevices(devices map[string]string) {
 	var wg sync.WaitGroup
 	for serialNumber, device := range devices {
@@ -305,7 +307,7 @@ func flashDevices(devices map[string]string) {
 			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "reboot", "bootloader")
 			_ = platformToolCommand.Run()
 			fmt.Println("Unlocking " + device + " " + serialNumber + " bootloader...")
-			warnln("Please use the volume and power keys on the device to confirm.")
+			warnln("5. Please use the volume and power keys on the device to unlock the bootloader")
 			for i := 0; getVar("unlocked", serialNumber) != "yes"; i++ {
 				platformToolCommand = *fastboot
 				platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "unlock")
@@ -316,6 +318,7 @@ func flashDevices(devices map[string]string) {
 					return
 				}
 			}
+			fmt.Println("Flashing " + device + " " + serialNumber + " bootloader...")
 			flashAll := exec.Command("." + string(os.PathSeparator) + "flash-all" + func() string {
 				if OS == "windows" {
 					return ".bat"
@@ -332,7 +335,7 @@ func flashDevices(devices map[string]string) {
 				return
 			}
 			fmt.Println("Locking " + device + " " + serialNumber + " bootloader...")
-			warnln("Please use the volume and power keys on the device to confirm.")
+			warnln("6. Please use the volume and power keys on the device to lock the bootloader")
 			for i := 0; getVar("unlocked", serialNumber) != "no"; i++ {
 				platformToolCommand = *fastboot
 				platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "lock")
