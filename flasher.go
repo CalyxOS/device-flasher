@@ -49,9 +49,10 @@ var platformToolsZip string
 
 var deviceFactoryFolderMap map[string]string
 
-const OS = runtime.GOOS
+// Set via LDFLAGS, check Makefile
+var version string
 
-const VERSION = "1.0.0"
+const OS = runtime.GOOS
 
 const (
 	UDEV_RULES = "# Google\nSUBSYSTEM==\"usb\", ATTR{idVendor}==\"18d1\", GROUP=\"sudo\"\n# Xiaomi\nSUBSYSTEM==\"usb\", ATTR{idVendor}==\"2717\", GROUP=\"sudo\"\n"
@@ -104,7 +105,7 @@ func cleanup() {
 func main() {
 	defer cleanup()
 	_ = os.Remove("error.log")
-	fmt.Println("Android Flash Tool v" + VERSION)
+	fmt.Println("Android Flash Tool v" + version)
 	// Map device codenames to their corresponding extracted factory image folders
 	deviceFactoryFolderMap = getFactoryFolders()
 	if len(deviceFactoryFolderMap) < 1 {
