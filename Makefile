@@ -1,4 +1,4 @@
-PROGRAM_NAME := device-flasher
+PROGRAM_NAME ?= device-flasher
 OSES := linux windows darwin
 PROGRAMS := $(foreach OS,$(OSES),$(PROGRAM_NAME).$(OS))
 
