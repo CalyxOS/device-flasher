@@ -359,10 +359,7 @@ func flashDevices(devices map[string]string) {
 func killPlatformTools() {
 	platformToolCommand := *adb
 	platformToolCommand.Args = append(platformToolCommand.Args, "kill-server")
-	err := platformToolCommand.Run()
-	if err != nil {
-		errorln(err.Error(), false)
-	}
+	_ = platformToolCommand.Run()
 	if OS == "windows" {
 		_ = exec.Command("taskkill", "/IM", "fastboot.exe", "/F").Run()
 	}
