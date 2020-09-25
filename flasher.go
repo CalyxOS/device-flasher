@@ -92,13 +92,17 @@ func warnln(warning interface{}) {
 }
 
 func cleanup() {
-	_, err := os.Stat(RULES_PATH + RULES_FILE)
-	if !os.IsNotExist(err) {
-		_ = exec.Command("sudo", "rm", RULES_PATH+RULES_FILE).Run()
+	killPlatformTools()
+	if OS == "linux" {
+		_, err := os.Stat(RULES_PATH + RULES_FILE)
+		if !os.IsNotExist(err) {
+			_ = exec.Command("sudo", "rm", RULES_PATH+RULES_FILE).Run()
+		}
 	}
 }
 
 func main() {
+	defer cleanup()
 	_ = os.Remove("error.log")
 	fmt.Println("Android Flash Tool v" + VERSION)
 	// Map device codenames to their corresponding extracted factory image folders
@@ -106,7 +110,6 @@ func main() {
 	if len(deviceFactoryFolderMap) < 1 {
 		errorln(errors.New("Cannot continue without a device factory image. Exiting..."), true)
 	}
-	platformToolsZip = "platform-tools_r" + platformToolsVersion + "-" + OS + ".zip"
 	err := getPlatformTools()
 	if err != nil {
 		errorln("Cannot continue without Android platform tools. Exiting...", false)
@@ -140,7 +143,6 @@ func main() {
 	_, _ = fmt.Scanln(&input)
 	// Sequence: unlock bootloader -> execute flash-all script -> relock bootloader
 	flashDevices(devices)
-	defer cleanup()
 }
 
 func getFactoryFolders() map[string]string {
@@ -173,46 +175,49 @@ func getFactoryFolders() map[string]string {
 }
 
 func getPlatformTools() error {
-	platformToolsPath := cwd + string(os.PathSeparator) + "platform-tools" + string(os.PathSeparator)
-	adbPath := platformToolsPath + "adb"
-	fastbootPath := platformToolsPath + "fastboot"
-	if OS == "windows" {
-		adbPath += ".exe"
-		fastbootPath += ".exe"
+	plaformToolsUrlMap := map[[2]string]string{
+		[2]string{"darwin", "29.0.6"}:  "https://dl.google.com/android/repository/platform-tools_r29.0.6-darwin.zip",
+		[2]string{"linux", "29.0.6"}:   "https://dl.google.com/android/repository/platform-tools_r29.0.6-linux.zip",
+		[2]string{"windows", "29.0.6"}: "https://dl.google.com/android/repository/platform-tools_r29.0.6-windows.zip",
+		[2]string{"darwin", "30.0.4"}:  "https://dl.google.com/android/repository/fbad467867e935dce68a0296b00e6d1e76f15b15.platform-tools_r30.0.4-darwin.zip",
+		[2]string{"linux", "30.0.4"}:   "https://dl.google.com/android/repository/platform-tools_r30.0.4-linux.zip",
+		[2]string{"windows", "30.0.4"}: "https://dl.google.com/android/repository/platform-tools_r30.0.4-windows.zip",
 	}
-	adb = exec.Command(adbPath)
-	fastboot = exec.Command(fastbootPath)
-	plaformToolsUrlMap := map[string]string{
-		"platform-tools_r29.0.6-darwin.zip":  "https://dl.google.com/android/repository/platform-tools_r29.0.6-darwin.zip",
-		"platform-tools_r29.0.6-linux.zip":   "https://dl.google.com/android/repository/platform-tools_r29.0.6-linux.zip",
-		"platform-tools_r29.0.6-windows.zip": "https://dl.google.com/android/repository/platform-tools_r29.0.6-windows.zip",
-		"platform-tools_r30.0.4-darwin.zip":  "https://dl.google.com/android/repository/fbad467867e935dce68a0296b00e6d1e76f15b15.platform-tools_r30.0.4-darwin.zip",
-		"platform-tools_r30.0.4-linux.zip":   "https://dl.google.com/android/repository/platform-tools_r30.0.4-linux.zip",
-		"platform-tools_r30.0.4-windows.zip": "https://dl.google.com/android/repository/platform-tools_r30.0.4-windows.zip",
+	platformToolsChecksumMap := map[[2]string]string{
+		[2]string{"darwin", "29.0.6"}:  "7555e8e24958cae4cfd197135950359b9fe8373d4862a03677f089d215119a3a",
+		[2]string{"linux", "29.0.6"}:   "cc9e9d0224d1a917bad71fe12d209dfffe9ce43395e048ab2f07dcfc21101d44",
+		[2]string{"windows", "29.0.6"}: "247210e3c12453545f8e1f76e55de3559c03f2d785487b2e4ac00fe9698a039c",
+		[2]string{"darwin", "30.0.4"}:  "e0db2bdc784c41847f854d6608e91597ebc3cef66686f647125f5a046068a890",
+		[2]string{"linux", "30.0.4"}:   "5be24ed897c7e061ba800bfa7b9ebb4b0f8958cc062f4b2202701e02f2725891",
+		[2]string{"windows", "30.0.4"}: "413182fff6c5957911e231b9e97e6be4fc6a539035e3dfb580b5c54bd5950fee",
 	}
-	platformToolsChecksumMap := map[string]string{
-		"platform-tools_r29.0.6-darwin.zip":  "7555e8e24958cae4cfd197135950359b9fe8373d4862a03677f089d215119a3a",
-		"platform-tools_r29.0.6-linux.zip":   "cc9e9d0224d1a917bad71fe12d209dfffe9ce43395e048ab2f07dcfc21101d44",
-		"platform-tools_r29.0.6-windows.zip": "247210e3c12453545f8e1f76e55de3559c03f2d785487b2e4ac00fe9698a039c",
-		"platform-tools_r30.0.4-darwin.zip":  "e0db2bdc784c41847f854d6608e91597ebc3cef66686f647125f5a046068a890",
-		"platform-tools_r30.0.4-linux.zip":   "5be24ed897c7e061ba800bfa7b9ebb4b0f8958cc062f4b2202701e02f2725891",
-		"platform-tools_r30.0.4-windows.zip": "413182fff6c5957911e231b9e97e6be4fc6a539035e3dfb580b5c54bd5950fee",
-	}
-	_, err := os.Stat(platformToolsZip)
+	platformToolsOsVersion := [2]string{OS, platformToolsVersion}
+	_, err := os.Stat(path.Base(plaformToolsUrlMap[platformToolsOsVersion]))
 	if err != nil {
-		err = downloadFile(plaformToolsUrlMap[platformToolsZip])
+		err = downloadFile(plaformToolsUrlMap[platformToolsOsVersion])
 		if err != nil {
 			return err
 		}
 	}
-	err = verifyZip(platformToolsZip, platformToolsChecksumMap[platformToolsZip])
+	platformToolsZip = path.Base(plaformToolsUrlMap[platformToolsOsVersion])
+	err = verifyZip(platformToolsZip, platformToolsChecksumMap[platformToolsOsVersion])
 	if err != nil {
 		fmt.Println(platformToolsZip + " checksum verification failed")
 		return err
 	}
 	// Ensure that no platform tools are running before attempting to overwrite them
-	killPlatformTools()
 	_, err = extractZip(platformToolsZip, cwd)
+	plaformToolsPath := cwd + string(os.PathSeparator) + "platform-tools" + string(os.PathSeparator)
+	if err == nil {
+		adbPath := plaformToolsPath + "adb"
+		fastbootPath := plaformToolsPath + "fastboot"
+		if OS == "windows" {
+			adbPath += ".exe"
+			fastbootPath += ".exe"
+		}
+		adb = exec.Command(adbPath)
+		fastboot = exec.Command(fastbootPath)
+	}
 	return err
 }
 
