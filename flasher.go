@@ -29,7 +29,6 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
-	"reflect"
 	"runtime"
 	"strconv"
 	"strings"
@@ -138,8 +137,10 @@ func main() {
 	if len(devices) == 0 {
 		errorln(errors.New("No devices detected. Exiting..."), true)
 	}
-	fmt.Print(Warn("Detected " + strconv.Itoa(len(devices)) + " devices: "))
-	fmt.Println(Warn(reflect.ValueOf(devices).MapKeys()))
+	fmt.Println(Warn("Detected " + strconv.Itoa(len(devices)) + " devices: "))
+	for serialNumber, device := range devices {
+		fmt.Println(Warn(device + " " + serialNumber))
+	}
 	fmt.Print("Press enter to continue")
 	_, _ = fmt.Scanln(&input)
 	// Sequence: unlock bootloader -> execute flash-all script -> relock bootloader
