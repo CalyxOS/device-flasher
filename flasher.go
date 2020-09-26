@@ -214,10 +214,10 @@ func getPlatformTools() error {
 	}
 	// Ensure that no platform tools are running before attempting to overwrite them
 	_, err = extractZip(platformToolsZip, cwd)
-	plaformToolsPath := cwd + string(os.PathSeparator) + "platform-tools" + string(os.PathSeparator)
+	platformToolsPath := cwd + string(os.PathSeparator) + "platform-tools" + string(os.PathSeparator)
 	if err == nil {
-		adbPath := plaformToolsPath + "adb"
-		fastbootPath := plaformToolsPath + "fastboot"
+		adbPath := platformToolsPath + "adb"
+		fastbootPath := platformToolsPath + "fastboot"
 		if OS == "windows" {
 			adbPath += ".exe"
 			fastbootPath += ".exe"
