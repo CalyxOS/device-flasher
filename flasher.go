@@ -136,6 +136,8 @@ func main() {
 	devices := getDevices()
 	if len(devices) == 0 {
 		errorln(errors.New("No devices to be flashed. Exiting..."), true)
+	} else if !PARALLEL && len(devices) > 1 {
+		errorln(errors.New("More than one device detected. Exiting..."), true)
 	}
 	fmt.Println()
 	fmt.Println("Devices to be flashed: ")
