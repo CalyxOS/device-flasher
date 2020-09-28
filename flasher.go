@@ -92,7 +92,6 @@ func warnln(warning interface{}) {
 }
 
 func cleanup() {
-	killPlatformTools()
 	if OS == "linux" {
 		_, err := os.Stat(RULES_PATH + RULES_FILE)
 		if !os.IsNotExist(err) {
@@ -212,8 +211,6 @@ func getPlatformTools() error {
 		fmt.Println(platformToolsZip + " checksum verification failed")
 		return err
 	}
-	// Ensure that no platform tools are running before attempting to overwrite them
-	_, err = extractZip(platformToolsZip, cwd)
 	platformToolsPath := cwd + string(os.PathSeparator) + "platform-tools" + string(os.PathSeparator)
 	pathEnvironmentVariable := func() string {
 		if OS == "windows" {
@@ -223,15 +220,17 @@ func getPlatformTools() error {
 		}
 	}()
 	_ = os.Setenv(pathEnvironmentVariable, platformToolsPath+string(os.PathListSeparator)+os.Getenv(pathEnvironmentVariable))
-		adbPath := platformToolsPath + "adb"
-		fastbootPath := platformToolsPath + "fastboot"
-		if OS == "windows" {
-			adbPath += ".exe"
-			fastbootPath += ".exe"
-		}
-		adb = exec.Command(adbPath)
-		fastboot = exec.Command(fastbootPath)
+	adbPath := platformToolsPath + "adb"
+	fastbootPath := platformToolsPath + "fastboot"
+	if OS == "windows" {
+		adbPath += ".exe"
+		fastbootPath += ".exe"
 	}
+	adb = exec.Command(adbPath)
+	fastboot = exec.Command(fastbootPath)
+	// Ensure that no platform tools are running before attempting to overwrite them
+	killPlatformTools()
+	_, err = extractZip(platformToolsZip, cwd)
 	return err
 }
 
@@ -376,7 +375,8 @@ func flashDevices(devices map[string]string) {
 }
 
 func killPlatformTools() {
-	if adb != nil {
+	_, err := os.Stat(adb.Path)
+	if err == nil {
 		platformToolCommand := *adb
 		platformToolCommand.Args = append(platformToolCommand.Args, "kill-server")
 		_ = platformToolCommand.Run()
