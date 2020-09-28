@@ -375,6 +375,7 @@ func flashDevices(devices map[string]string) {
 			_ = platformToolCommand.Start()
 		}(serialNumber, device)
 	}
+	warnln("7. Disable OEM unlocking from Developer Options after setting up your device")
 	wg.Wait()
 	fmt.Println()
 	fmt.Println(Blue("Flashing complete"))
