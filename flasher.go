@@ -32,6 +32,7 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"time"
 )
 
 var input string
@@ -176,7 +177,7 @@ func getFactoryFolders() map[string]string {
 				if _, exists := deviceFactoryFolderMap[device]; !exists {
 					deviceFactoryFolderMap[device] = extracted[0]
 				} else {
-					errorln("More than one factory image available for " + device, true)
+					errorln("More than one factory image available for "+device, true)
 				}
 			}(file)
 		}
@@ -338,10 +339,10 @@ func flashDevices(devices map[string]string) {
 			for i := 0; getVar("unlocked", serialNumber) != "yes"; i++ {
 				platformToolCommand = *fastboot
 				platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "unlock")
-				err := platformToolCommand.Run()
-				if err != nil && i >= 2 {
+				_ = platformToolCommand.Start()
+				time.Sleep(30 * time.Second)
+				if i >= 2 {
 					errorln("Failed to unlock "+device+" "+serialNumber+" bootloader", false)
-					errorln(err, false)
 					return
 				}
 			}
@@ -366,10 +367,10 @@ func flashDevices(devices map[string]string) {
 			for i := 0; getVar("unlocked", serialNumber) != "no"; i++ {
 				platformToolCommand = *fastboot
 				platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "lock")
-				err := platformToolCommand.Run()
-				if err != nil && i >= 2 {
+				_ = platformToolCommand.Start()
+				time.Sleep(30 * time.Second)
+				if i >= 2 {
 					errorln("Failed to lock "+device+" "+serialNumber+" bootloader", false)
-					errorln(err, false)
 					return
 				}
 			}
