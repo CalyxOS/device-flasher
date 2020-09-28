@@ -168,7 +168,12 @@ func getFactoryFolders() map[string]string {
 					errorln("Cannot continue without a factory image. Exiting...", false)
 					errorln(err, true)
 				}
-				deviceFactoryFolderMap[strings.Split(file, "-")[0]] = extracted[0]
+				device := strings.Split(file, "-")[0]
+				if _, exists := deviceFactoryFolderMap[device]; !exists {
+					deviceFactoryFolderMap[device] = extracted[0]
+				} else {
+					errorln("More than one factory image available for " + device, true)
+				}
 			}(file)
 		}
 	}
