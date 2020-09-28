@@ -65,6 +65,7 @@ var (
 )
 
 var (
+	Blue   = Color("\033[1;34m%s\033[0m")
 	Red    = Color("\033[1;31m%s\033[0m")
 	Yellow = Color("\033[1;33m%s\033[0m")
 )
@@ -375,7 +376,8 @@ func flashDevices(devices map[string]string) {
 		}(serialNumber, device)
 	}
 	wg.Wait()
-	fmt.Println("Flashing complete")
+	fmt.Println()
+	fmt.Println(Blue("Flashing complete"))
 }
 
 func killPlatformTools() {
