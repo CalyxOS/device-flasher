@@ -158,31 +158,25 @@ func getFactoryFolders() map[string]string {
 		errorln(err, true)
 	}
 	deviceFactoryFolderMap := map[string]string{}
-	var wg sync.WaitGroup
 	for _, file := range files {
 		file := file.Name()
 		if strings.Contains(file, "factory") && strings.HasSuffix(file, ".zip") {
 			if strings.HasPrefix(file, "jasmine") {
 				platformToolsVersion = "29.0.6"
 			}
-			wg.Add(1)
-			go func(file string) {
-				defer wg.Done()
-				extracted, err := extractZip(path.Base(file), cwd)
-				if err != nil {
-					errorln("Cannot continue without a factory image. Exiting...", false)
-					errorln(err, true)
-				}
-				device := strings.Split(file, "-")[0]
-				if _, exists := deviceFactoryFolderMap[device]; !exists {
-					deviceFactoryFolderMap[device] = extracted[0]
-				} else {
-					errorln("More than one factory image available for "+device, true)
-				}
-			}(file)
+			extracted, err := extractZip(path.Base(file), cwd)
+			if err != nil {
+				errorln("Cannot continue without a factory image. Exiting...", false)
+				errorln(err, true)
+			}
+			device := strings.Split(file, "-")[0]
+			if _, exists := deviceFactoryFolderMap[device]; !exists {
+				deviceFactoryFolderMap[device] = extracted[0]
+			} else {
+				errorln("More than one factory image available for "+device, true)
+			}
 		}
 	}
-	wg.Wait()
 	return deviceFactoryFolderMap
 }
 
