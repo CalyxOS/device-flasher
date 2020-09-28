@@ -30,7 +30,6 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
-	"strconv"
 	"strings"
 	"sync"
 )
@@ -129,18 +128,22 @@ func main() {
 	warnln("2. Enable Developer Options on device (Settings -> About Phone -> tap \"Build number\" 7 times)")
 	warnln("3. Enable USB debugging on device (Settings -> System -> Advanced -> Developer Options) and allow the computer to debug (hit \"OK\" on the popup when USB is connected)")
 	warnln("4. Enable OEM Unlocking (in the same Developer Options menu)")
-	fmt.Print("When done, press enter to continue")
+	fmt.Println()
+	fmt.Print(Warn("Press ENTER to continue"))
 	_, _ = fmt.Scanln(&input)
+	fmt.Println()
 	// Map serial numbers to device codenames by extracting them from adb and fastboot command output
 	devices := getDevices()
 	if len(devices) == 0 {
-		errorln(errors.New("No devices detected. Exiting..."), true)
+		errorln(errors.New("No devices to be flashed. Exiting..."), true)
 	}
-	fmt.Println(Warn("Detected " + strconv.Itoa(len(devices)) + " devices: "))
+	fmt.Println()
+	fmt.Println("Devices to be flashed: ")
 	for serialNumber, device := range devices {
-		fmt.Println(Warn(device + " " + serialNumber))
+		fmt.Println(device + " " + serialNumber)
 	}
-	fmt.Print("Press enter to continue")
+	fmt.Println()
+	fmt.Print(Warn("Press ENTER to continue"))
 	_, _ = fmt.Scanln(&input)
 	// Sequence: unlock bootloader -> execute flash-all script -> relock bootloader
 	flashDevices(devices)
@@ -280,8 +283,12 @@ func getDevices() map[string]string {
 						device += "_sprout"
 					}
 				}
+				fmt.Print("Detected " + device + " " + serialNumber)
 				if _, ok := deviceFactoryFolderMap[device]; ok {
 					devices[serialNumber] = device
+					fmt.Println()
+				} else {
+					fmt.Println(". " + "No matching factory image found")
 				}
 			}
 		}
