@@ -332,7 +332,7 @@ func flashDevices(devices map[string]string) {
 			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "reboot", "bootloader")
 			_ = platformToolCommand.Run()
 			fmt.Println("Unlocking " + device + " " + serialNumber + " bootloader...")
-			warnln("5. Please use the volume and power keys on the device to unlock the bootloader")
+			warnln("5. Please use the volume and power keys on the device to unlock the bootloader. Then, manually reboot to bootloader if necessary")
 			for i := 0; getVar("unlocked", serialNumber) != "yes"; i++ {
 				platformToolCommand = *fastboot
 				platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "unlock")
@@ -360,7 +360,7 @@ func flashDevices(devices map[string]string) {
 				return
 			}
 			fmt.Println("Locking " + device + " " + serialNumber + " bootloader...")
-			warnln("6. Please use the volume and power keys on the device to lock the bootloader")
+			warnln("6. Please use the volume and power keys on the device to lock the bootloader. Then, manually reboot to bootloader if necessary")
 			for i := 0; getVar("unlocked", serialNumber) != "no"; i++ {
 				platformToolCommand = *fastboot
 				platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "lock")
