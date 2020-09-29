@@ -84,6 +84,8 @@ func errorln(err interface{}, fatal bool) {
 	log.Close()
 	if fatal {
 		cleanup()
+		fmt.Println("Press enter to exit.")
+		_, _ = fmt.Scanln(&input)
 		os.Exit(1)
 	}
 }
