@@ -245,13 +245,13 @@ func checkUdevRules() {
 			errorln("Cannot continue without udev rules. Exiting...", false)
 			errorln(err, true)
 		}
-		_, err = os.Stat(RULES_FILE)
-		if os.IsNotExist(err) {
-			err = ioutil.WriteFile(RULES_FILE, []byte(UDEV_RULES), 0644)
-			if err != nil {
-				errorln("Cannot continue without udev rules. Exiting...", false)
-				errorln(err, true)
-			}
+	}
+	_, err = os.Stat(RULES_FILE)
+	if os.IsNotExist(err) {
+		err = ioutil.WriteFile(RULES_FILE, []byte(UDEV_RULES), 0644)
+		if err != nil {
+			errorln("Cannot continue without udev rules. Exiting...", false)
+			errorln(err, true)
 		}
 		err = exec.Command("sudo", "cp", RULES_FILE, RULES_PATH).Run()
 		if err != nil {
