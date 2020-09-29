@@ -18,4 +18,6 @@ compile:
     - make
   artifacts:
     paths:
-      - device-flasher.*
+      - '*.linux'
+      - '*.exe'
+      - '*.darwin'
