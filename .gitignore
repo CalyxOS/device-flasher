@@ -4,8 +4,8 @@
 *.dll
 *.so
 *.dylib
-device-flasher.*
-CalyxOS-flasher_*
+*.darwin
+*.linux
 
 # Jetbrains IDE configuration files
 .idea
