@@ -56,7 +56,7 @@ const OS = runtime.GOOS
 const (
 	UDEV_RULES = "# Google\nSUBSYSTEM==\"usb\", ATTR{idVendor}==\"18d1\", GROUP=\"sudo\"\n# Xiaomi\nSUBSYSTEM==\"usb\", ATTR{idVendor}==\"2717\", GROUP=\"sudo\"\n"
 	RULES_FILE = "98-device-flasher.rules"
-	RULES_PATH = "/etc/udev/rules.d2/"
+	RULES_PATH = "/etc/udev/rules.d/"
 )
 
 var (
