@@ -4,8 +4,17 @@
 *.dll
 *.so
 *.dylib
-device-flasher.*
-CalyxOS-flasher_*
+*.darwin
+*.linux
+
+# Jetbrains IDE configuration files
+.idea
+
+# Flasher input and outputs files
+platform-tools
+*factory*
+*.log
+*.zip
 
 # Test binary, built with `go test -c`
 *.test
