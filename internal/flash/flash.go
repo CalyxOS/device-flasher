@@ -117,7 +117,7 @@ func (f *Flash) Flash(device *Device) error {
 	logger.Info("rebooting device")
 	err = f.fastboot.Reboot(device.ID)
 	if err != nil {
-		return err
+		logger.Warnf("failed to reboot device: %v. may need to manually reboot", err)
 	}
 	logger.Info("finished flashing device")
 

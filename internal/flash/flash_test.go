@@ -134,7 +134,7 @@ func TestFlash(t *testing.T) {
 			},
 			expectedErr: fastboot.ErrorLockBootloader,
 		},
-		"reboot failure": {
+		"reboot error is not fatal": {
 			device: testDevice,
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
 				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
@@ -148,7 +148,7 @@ func TestFlash(t *testing.T) {
 				mockFastboot.EXPECT().Reboot(testDevice.ID).Return(fastboot.ErrorRebootFailure)
 				mockADB.EXPECT().KillServer()
 			},
-			expectedErr: fastboot.ErrorRebootFailure,
+			expectedErr: nil,
 		},
 	}
 
