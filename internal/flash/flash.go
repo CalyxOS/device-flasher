@@ -1,4 +1,4 @@
-//go:generate mockgen -destination=mocks/mocks.go -package=mocks . FactoryImageFlasher,PlatformToolsFlasher,ADBFlasher,FastbootFlasher,UdevFlasher
+//go:generate mockgen -destination=mocks/mocks.go -package=mocks . FactoryImageFlasher,PlatformToolsFlasher,ADBFlasher,FastbootFlasher
 package flash
 
 import (
@@ -37,17 +37,12 @@ type FastbootFlasher interface {
 	Reboot(deviceId string) error
 }
 
-type UdevFlasher interface {
-	Setup() error
-}
-
 type Config struct {
 	HostOS        string
 	FactoryImage  FactoryImageFlasher
 	PlatformTools PlatformToolsFlasher
 	ADB           ADBFlasher
-	Fastboot	  FastbootFlasher
-	Udev          UdevFlasher
+	Fastboot      FastbootFlasher
 	Logger        *logrus.Logger
 }
 
@@ -57,19 +52,17 @@ type Flash struct {
 	platformTools PlatformToolsFlasher
 	adb           ADBFlasher
 	fastboot      FastbootFlasher
-	udev          UdevFlasher
 	logger        *logrus.Logger
 }
 
 func New(config *Config) *Flash {
 	return &Flash{
-		hostOS:           config.HostOS,
-		factoryImage:     config.FactoryImage,
-		platformTools:    config.PlatformTools,
-		adb:              config.ADB,
-		fastboot:         config.Fastboot,
-		udev:             config.Udev,
-		logger:           config.Logger,
+		hostOS:        config.HostOS,
+		factoryImage:  config.FactoryImage,
+		platformTools: config.PlatformTools,
+		adb:           config.ADB,
+		fastboot:      config.Fastboot,
+		logger:        config.Logger,
 	}
 }
 
@@ -77,7 +70,7 @@ func (f *Flash) Flash(device *Device) error {
 	defer f.adb.KillServer()
 
 	logger := f.logger.WithFields(logrus.Fields{
-		"deviceId": device.ID,
+		"deviceId":       device.ID,
 		"deviceCodename": device.Codename,
 	})
 
@@ -132,11 +125,6 @@ func (f *Flash) Flash(device *Device) error {
 }
 
 func (f *Flash) DiscoverDevices() ([]*Device, error) {
-	err := f.udev.Setup()
-	if err != nil {
-		return nil, err
-	}
-
 	deviceIds, err := f.getDeviceIds()
 	if err != nil {
 		return nil, err
@@ -191,7 +179,7 @@ func (f *Flash) generateDevices(deviceIds []string) ([]*Device, error) {
 			return nil, err
 		}
 		devices = append(devices, &Device{
-			ID: deviceId,
+			ID:       deviceId,
 			Codename: deviceCodename,
 		})
 	}

@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	testOS = "TestOS"
+	testOS     = "TestOS"
 	testDevice = &Device{ID: "8AAY0GK9A", Codename: "crosshatch"}
 )
 
@@ -21,15 +21,15 @@ func TestFlash(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	tests := map[string]struct {
-		device *Device
+		device  *Device
 		prepare func(*mocks.MockFactoryImageFlasher, *mocks.MockPlatformToolsFlasher,
-			*mocks.MockADBFlasher, *mocks.MockFastbootFlasher, *mocks.MockUdevFlasher)
+			*mocks.MockADBFlasher, *mocks.MockFastbootFlasher)
 		expectedErr error
 	}{
 		"happy path flash successful": {
 			device: testDevice,
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
-				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher, mockUdev *mocks.MockUdevFlasher) {
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
 				mockFactoryImage.EXPECT().Validate(testDevice.Codename).Return(nil)
 				mockADB.EXPECT().RebootIntoBootloader(testDevice.ID).Return(nil)
 				mockFastboot.EXPECT().GetBootloaderLockStatus(testDevice.ID).Return(fastboot.Locked, nil)
@@ -45,7 +45,7 @@ func TestFlash(t *testing.T) {
 		"unlocked device skips unlocking step": {
 			device: testDevice,
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
-				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher, mockUdev *mocks.MockUdevFlasher) {
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
 				mockFactoryImage.EXPECT().Validate(testDevice.Codename).Return(nil)
 				mockADB.EXPECT().RebootIntoBootloader(testDevice.ID).Return(nil)
 				mockFastboot.EXPECT().GetBootloaderLockStatus(testDevice.ID).Return(fastboot.Unlocked, nil)
@@ -60,7 +60,7 @@ func TestFlash(t *testing.T) {
 		"factory image validation failure": {
 			device: testDevice,
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
-				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher, mockUdev *mocks.MockUdevFlasher) {
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
 				mockFactoryImage.EXPECT().Validate(testDevice.Codename).Return(factoryimage.ErrorValidation)
 				mockADB.EXPECT().KillServer()
 			},
@@ -69,7 +69,7 @@ func TestFlash(t *testing.T) {
 		"adb reboot bootloader error not fatal": {
 			device: testDevice,
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
-				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher, mockUdev *mocks.MockUdevFlasher) {
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
 				mockFactoryImage.EXPECT().Validate(testDevice.Codename).Return(nil)
 				mockADB.EXPECT().RebootIntoBootloader(testDevice.ID).Return(errors.New("not fatal"))
 				mockFastboot.EXPECT().GetBootloaderLockStatus(testDevice.ID).Return(fastboot.Locked, nil)
@@ -85,7 +85,7 @@ func TestFlash(t *testing.T) {
 		"get bootloader status failure": {
 			device: testDevice,
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
-				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher, mockUdev *mocks.MockUdevFlasher) {
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
 				mockFactoryImage.EXPECT().Validate(testDevice.Codename).Return(nil)
 				mockADB.EXPECT().RebootIntoBootloader(testDevice.ID).Return(nil)
 				mockFastboot.EXPECT().GetBootloaderLockStatus(testDevice.ID).Return(fastboot.Unknown, fastboot.ErrorCommandFailure)
@@ -96,7 +96,7 @@ func TestFlash(t *testing.T) {
 		"set bootloader status unlock failure": {
 			device: testDevice,
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
-				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher, mockUdev *mocks.MockUdevFlasher) {
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
 				mockFactoryImage.EXPECT().Validate(testDevice.Codename).Return(nil)
 				mockADB.EXPECT().RebootIntoBootloader(testDevice.ID).Return(nil)
 				mockFastboot.EXPECT().GetBootloaderLockStatus(testDevice.ID).Return(fastboot.Locked, nil)
@@ -108,7 +108,7 @@ func TestFlash(t *testing.T) {
 		"flash all error": {
 			device: testDevice,
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
-				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher, mockUdev *mocks.MockUdevFlasher) {
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
 				mockFactoryImage.EXPECT().Validate(testDevice.Codename).Return(nil)
 				mockADB.EXPECT().RebootIntoBootloader(testDevice.ID).Return(nil)
 				mockFastboot.EXPECT().GetBootloaderLockStatus(testDevice.ID).Return(fastboot.Locked, nil)
@@ -122,7 +122,7 @@ func TestFlash(t *testing.T) {
 		"set bootloader status lock failure": {
 			device: testDevice,
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
-				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher, mockUdev *mocks.MockUdevFlasher) {
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
 				mockFactoryImage.EXPECT().Validate(testDevice.Codename).Return(nil)
 				mockADB.EXPECT().RebootIntoBootloader(testDevice.ID).Return(nil)
 				mockFastboot.EXPECT().GetBootloaderLockStatus(testDevice.ID).Return(fastboot.Locked, nil)
@@ -137,7 +137,7 @@ func TestFlash(t *testing.T) {
 		"reboot failure": {
 			device: testDevice,
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
-				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher, mockUdev *mocks.MockUdevFlasher) {
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
 				mockFactoryImage.EXPECT().Validate(testDevice.Codename).Return(nil)
 				mockADB.EXPECT().RebootIntoBootloader(testDevice.ID).Return(nil)
 				mockFastboot.EXPECT().GetBootloaderLockStatus(testDevice.ID).Return(fastboot.Locked, nil)
@@ -158,20 +158,18 @@ func TestFlash(t *testing.T) {
 			mockPlatformTools := mocks.NewMockPlatformToolsFlasher(ctrl)
 			mockADB := mocks.NewMockADBFlasher(ctrl)
 			mockFastboot := mocks.NewMockFastbootFlasher(ctrl)
-			mockUdev := mocks.NewMockUdevFlasher(ctrl)
 
 			if tc.prepare != nil {
-				tc.prepare(mockFactoryImage, mockPlatformTools, mockADB, mockFastboot, mockUdev)
+				tc.prepare(mockFactoryImage, mockPlatformTools, mockADB, mockFastboot)
 			}
 
 			flash := New(&Config{
-				HostOS: testOS,
-				FactoryImage: mockFactoryImage,
+				HostOS:        testOS,
+				FactoryImage:  mockFactoryImage,
 				PlatformTools: mockPlatformTools,
-				ADB: mockADB,
-				Fastboot: mockFastboot,
-				Udev: mockUdev,
-				Logger: logrus.StandardLogger(),
+				ADB:           mockADB,
+				Fastboot:      mockFastboot,
+				Logger:        logrus.StandardLogger(),
 			})
 
 			err := flash.Flash(tc.device)
@@ -188,42 +186,39 @@ func TestDiscoverDevices(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	tests := map[string]struct {
-		device *Device
+		device  *Device
 		prepare func(*mocks.MockFactoryImageFlasher, *mocks.MockPlatformToolsFlasher,
-			*mocks.MockADBFlasher, *mocks.MockFastbootFlasher, *mocks.MockUdevFlasher)
-		expectedErr error
+			*mocks.MockADBFlasher, *mocks.MockFastbootFlasher)
+		expectedErr     error
 		expectedDevices []*Device
 	}{
 		"discovery successful with default device": {
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
-							mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher, mockUdev *mocks.MockUdevFlasher) {
-				mockUdev.EXPECT().Setup()
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
 				mockADB.EXPECT().GetDeviceIds().Return([]string{testDevice.ID}, nil)
 				mockADB.EXPECT().GetDeviceCodename(testDevice.ID).Return(testDevice.Codename, nil)
 			},
-			expectedErr: nil,
+			expectedErr:     nil,
 			expectedDevices: []*Device{testDevice},
 		},
 		"discovery fails when get device fails for both adb and fastboot": {
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
-				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher, mockUdev *mocks.MockUdevFlasher) {
-				mockUdev.EXPECT().Setup()
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
 				mockADB.EXPECT().GetDeviceIds().Return(nil, errors.New("failed"))
 				mockFastboot.EXPECT().GetDeviceIds().Return(nil, errors.New("failed"))
 			},
-			expectedErr: ErrNoDevicesFound,
+			expectedErr:     ErrNoDevicesFound,
 			expectedDevices: nil,
 		},
 		"discovery successful if adb fails and then fastboot succeeds": {
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
-				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher, mockUdev *mocks.MockUdevFlasher) {
-				mockUdev.EXPECT().Setup()
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
 				mockADB.EXPECT().GetDeviceIds().Return(nil, errors.New("failed"))
 				mockADB.EXPECT().GetDeviceCodename(testDevice.ID).Return("", errors.New("failed"))
 				mockFastboot.EXPECT().GetDeviceIds().Return([]string{testDevice.ID}, nil)
 				mockFastboot.EXPECT().GetDeviceCodename(testDevice.ID).Return(testDevice.Codename, nil)
 			},
-			expectedErr: nil,
+			expectedErr:     nil,
 			expectedDevices: []*Device{testDevice},
 		},
 	}
@@ -234,20 +229,18 @@ func TestDiscoverDevices(t *testing.T) {
 			mockPlatformTools := mocks.NewMockPlatformToolsFlasher(ctrl)
 			mockADB := mocks.NewMockADBFlasher(ctrl)
 			mockFastboot := mocks.NewMockFastbootFlasher(ctrl)
-			mockUdev := mocks.NewMockUdevFlasher(ctrl)
 
 			if tc.prepare != nil {
-				tc.prepare(mockFactoryImage, mockPlatformTools, mockADB, mockFastboot, mockUdev)
+				tc.prepare(mockFactoryImage, mockPlatformTools, mockADB, mockFastboot)
 			}
 
 			flash := New(&Config{
-				HostOS: testOS,
-				FactoryImage: mockFactoryImage,
+				HostOS:        testOS,
+				FactoryImage:  mockFactoryImage,
 				PlatformTools: mockPlatformTools,
-				ADB: mockADB,
-				Fastboot: mockFastboot,
-				Udev: mockUdev,
-				Logger: logrus.StandardLogger(),
+				ADB:           mockADB,
+				Fastboot:      mockFastboot,
+				Logger:        logrus.StandardLogger(),
 			})
 
 			devices, err := flash.DiscoverDevices()

@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	DefaultBaseURI = "https://dl.google.com/android/repository"
+	DefaultBaseURI                = "https://dl.google.com/android/repository"
 	PlatformToolsFilenameTemplate = "platform-tools-%v-%v.zip"
 )
 
@@ -25,12 +25,12 @@ const (
 type PlatformToolsPath string
 
 type Config struct {
-	BaseURI string
-	HttpClient *http.Client
-	HostOS string
-	ToolsVersion string
+	BaseURI              string
+	HttpClient           *http.Client
+	HostOS               string
+	ToolsVersion         string
 	DestinationDirectory string
-	Logger *logrus.Logger
+	Logger               *logrus.Logger
 }
 
 type PlatformTools struct {
@@ -62,13 +62,13 @@ func New(config *Config) (*PlatformTools, error) {
 	}
 
 	platformTools := &PlatformTools{
-		path: path,
-		httpClient: config.HttpClient,
-		downloadURI: downloadURI,
-		sha256: sha256,
+		path:             path,
+		httpClient:       config.HttpClient,
+		downloadURI:      downloadURI,
+		sha256:           sha256,
 		workingDirectory: workingDirectory,
-		zipFile: zipFile,
-		logger: config.Logger,
+		zipFile:          zipFile,
+		logger:           config.Logger,
 	}
 
 	err := platformTools.initialize()
@@ -82,8 +82,8 @@ func New(config *Config) (*PlatformTools, error) {
 func (p *PlatformTools) initialize() error {
 	logger := p.logger.WithFields(logrus.Fields{
 		"downloadURI": p.downloadURI,
-		"sha256": p.sha256,
-		"zipFile": p.zipFile,
+		"sha256":      p.sha256,
+		"zipFile":     p.zipFile,
 	})
 
 	logger.Debug("starting tools download")

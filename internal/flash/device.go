@@ -1,6 +1,6 @@
 package flash
 
 type Device struct {
-	ID string
+	ID       string
 	Codename string
 }

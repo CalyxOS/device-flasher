@@ -14,15 +14,15 @@ import (
 
 var (
 	ErrorFailedToFlash = errors.New("failed to flash device")
-	ErrorValidation = errors.New("failed to validate image for device")
+	ErrorValidation    = errors.New("failed to validate image for device")
 )
 
 type Config struct {
-	HostOS string
-	Name string
-	ImagePath string
+	HostOS           string
+	Name             string
+	ImagePath        string
 	WorkingDirectory string
-	Logger *logrus.Logger
+	Logger           *logrus.Logger
 }
 
 type FactoryImage struct {
@@ -84,13 +84,13 @@ func (f *FactoryImage) Validate(deviceCodename string) error {
 	if _, err := os.Stat(f.imagePath); os.IsNotExist(err) {
 		return fmt.Errorf("%w: %v", ErrorValidation, err)
 	}
-	if ! strings.Contains(f.imagePath, strings.ToLower(deviceCodename)) {
+	if !strings.Contains(f.imagePath, strings.ToLower(deviceCodename)) {
 		return fmt.Errorf("%w: image filename should contain device codename %v", ErrorValidation, deviceCodename)
 	}
-	if ! strings.HasSuffix(f.imagePath, ".zip") {
+	if !strings.HasSuffix(f.imagePath, ".zip") {
 		return fmt.Errorf("%w: image filename should end in .zip", ErrorValidation)
 	}
-	if ! strings.Contains(f.imagePath, "factory") {
+	if !strings.Contains(f.imagePath, "factory") {
 		return fmt.Errorf("%w: image filename should contain 'factory'", ErrorValidation)
 	}
 	return nil
@@ -112,8 +112,8 @@ func (f *FactoryImage) setup() error {
 
 func (f *FactoryImage) extract() error {
 	f.logger.WithFields(logrus.Fields{
-		"name": f.name,
-		"imagePath": f.imagePath,
+		"name":             f.name,
+		"imagePath":        f.imagePath,
 		"workingDirectory": f.workingDirectory,
 	}).Info("extracting factory image")
 	err := archiver.Unarchive(f.imagePath, f.workingDirectory)
@@ -147,7 +147,7 @@ func (f *FactoryImage) postExtractValidations() error {
 	}
 
 	f.logger.WithFields(logrus.Fields{
-		"flashAllScript": f.flashAllScript,
+		"flashAllScript":     f.flashAllScript,
 		"extractedDirectory": f.extractedDirectory,
 	}).Debug("validated extracted factory image")
 

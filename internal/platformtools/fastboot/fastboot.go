@@ -16,10 +16,10 @@ const (
 )
 
 var (
-	ErrorCommandFailure = errors.New("failed running command")
-	ErrorUnlockBootloader = errors.New("failed to unlock bootloader")
-	ErrorLockBootloader = errors.New("failed to lock bootloader")
-	ErrorRebootFailure = errors.New("failed to reboot")
+	ErrorCommandFailure    = errors.New("failed running command")
+	ErrorUnlockBootloader  = errors.New("failed to unlock bootloader")
+	ErrorLockBootloader    = errors.New("failed to lock bootloader")
+	ErrorRebootFailure     = errors.New("failed to reboot")
 	ErrorUnknownLockStatus = errors.New("unknown unlocked value returned")
 )
 

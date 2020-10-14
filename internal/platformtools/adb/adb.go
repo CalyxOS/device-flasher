@@ -43,7 +43,7 @@ func (t *Tool) GetDeviceIds() ([]string, error) {
 }
 
 func (t *Tool) GetDeviceCodename(deviceId string) (string, error) {
-	return  t.getProp("ro.product.device", deviceId)
+	return t.getProp("ro.product.device", deviceId)
 }
 
 func (t *Tool) RebootIntoBootloader(deviceId string) error {
