@@ -22,16 +22,19 @@ type PlatformToolsFlasher interface {
 	Path() platformtools.PlatformToolsPath
 }
 
-type ADBFlasher interface {
+type DeviceDiscoverer interface {
 	GetDeviceIds() ([]string, error)
 	GetDeviceCodename(deviceId string) (string, error)
+}
+
+type ADBFlasher interface {
+	DeviceDiscoverer
 	RebootIntoBootloader(deviceId string) error
 	KillServer() error
 }
 
 type FastbootFlasher interface {
-	GetDeviceIds() ([]string, error)
-	GetDeviceCodename(deviceId string) (string, error)
+	DeviceDiscoverer
 	SetBootloaderLockStatus(deviceId string, wanted fastboot.FastbootLockStatus) error
 	GetBootloaderLockStatus(deviceId string) (fastboot.FastbootLockStatus, error)
 	Reboot(deviceId string) error
@@ -67,8 +70,6 @@ func New(config *Config) *Flash {
 }
 
 func (f *Flash) Flash(device *Device) error {
-	defer f.adb.KillServer()
-
 	logger := f.logger.WithFields(logrus.Fields{
 		"deviceId":       device.ID,
 		"deviceCodename": device.Codename,
@@ -80,10 +81,12 @@ func (f *Flash) Flash(device *Device) error {
 		return err
 	}
 
-	logger.Info("reboot into bootloader")
-	err = f.adb.RebootIntoBootloader(device.ID)
-	if err != nil {
-		f.logger.Debugf("ignoring adb reboot error and will attempt fastboot access: %v", err)
+	if device.DiscoveryType == ADBDiscovered {
+		logger.Info("reboot into bootloader")
+		err = f.adb.RebootIntoBootloader(device.ID)
+		if err != nil {
+			f.logger.Debugf("ignoring adb reboot error and will attempt fastboot access: %v", err)
+		}
 	}
 
 	logger.Info("checking bootloader status")
@@ -124,64 +127,60 @@ func (f *Flash) Flash(device *Device) error {
 	return nil
 }
 
-func (f *Flash) DiscoverDevices() ([]*Device, error) {
-	deviceIds, err := f.getDeviceIds()
+func (f *Flash) DiscoverDevices() (map[string]*Device, error) {
+	devices := map[string]*Device{}
+	f.logger.Debug("running adb get devices")
+	adbDeviceIds, err := f.adb.GetDeviceIds()
 	if err != nil {
-		return nil, err
+		f.logger.Infof("unable to get adb devices: %v", err)
+	} else {
+		devices, err = f.generateDevices(adbDeviceIds, f.adb, ADBDiscovered)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	devices, err := f.generateDevices(deviceIds)
+	fastbootDevices := map[string]*Device{}
+	f.logger.Debug("running fastboot get devices")
+	fastbootDeviceIds, err := f.fastboot.GetDeviceIds()
 	if err != nil {
-		return nil, err
+		f.logger.Infof("unable to get fastboot devices: %v", err)
+	} else {
+		fastbootDevices, err = f.generateDevices(fastbootDeviceIds, f.fastboot, FastbootDiscovered)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	for k, v := range fastbootDevices {
+		devices[k] = v
+	}
+
+	if len(devices) == 0 {
+		return nil, ErrNoDevicesFound
 	}
 
 	return devices, nil
 }
 
-func (f *Flash) getDeviceIds() ([]string, error) {
-	f.logger.Debug("running adb get devices")
-	deviceIds, err := f.adb.GetDeviceIds()
-	if err != nil {
-		f.logger.Infof("unable to get adb devices: %v", err)
-	}
-	if len(deviceIds) == 0 {
-		f.logger.Debug("running fastboot get devices")
-		deviceIds, err = f.fastboot.GetDeviceIds()
-		if err != nil {
-			f.logger.Infof("unable to get fastboot devices: %v", err)
-		}
-		if len(deviceIds) == 0 {
-			return nil, ErrNoDevicesFound
-		}
-	}
-	return deviceIds, nil
-}
-
-func (f *Flash) getDeviceCodename(deviceId string) (string, error) {
-	f.logger.Debugf("getting code name for device %v", deviceId)
-	deviceCodename, err := f.adb.GetDeviceCodename(deviceId)
-	if err != nil {
-		f.logger.Debugf("unable to get code name through adb for %v: %v", deviceId, err)
-		deviceCodename, err = f.fastboot.GetDeviceCodename(deviceId)
-		if err != nil {
-			f.logger.Debugf("unable to get code name through fastboot for %v: %v", deviceId, err)
-			return "", fmt.Errorf("cannot determine device model for %v: %w", deviceId, err)
-		}
-	}
-	return deviceCodename, nil
-}
-
-func (f *Flash) generateDevices(deviceIds []string) ([]*Device, error) {
-	var devices []*Device
+func (f *Flash) generateDevices(deviceIds []string, tool DeviceDiscoverer, discoverType DiscoveryType) (map[string]*Device, error) {
+	devices := map[string]*Device{}
 	for _, deviceId := range deviceIds {
-		deviceCodename, err := f.getDeviceCodename(deviceId)
+		f.logger.Debugf("getting code name for device %v", deviceId)
+		deviceCodename, err := tool.GetDeviceCodename(deviceId)
 		if err != nil {
-			return nil, err
+			f.logger.Warnf("skipping device %v as getting code name failed: %v", deviceId, err)
+			continue
 		}
-		devices = append(devices, &Device{
-			ID:       deviceId,
+		if _, ok := devices[deviceId]; ok {
+			f.logger.Warnf("skipping duplicate device %v", deviceId)
+			continue
+		}
+		devices[deviceId] = &Device{
+			ID: deviceId,
 			Codename: deviceCodename,
-		})
+			DiscoveryType: discoverType,
+		}
 	}
 	return devices, nil
 }

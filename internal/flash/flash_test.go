@@ -14,11 +14,13 @@ import (
 
 var (
 	testOS     = "TestOS"
-	testDevice = &Device{ID: "8AAY0GK9A", Codename: "crosshatch"}
 )
 
 func TestFlash(t *testing.T) {
 	ctrl := gomock.NewController(t)
+
+	testDevice := &Device{ID: "8AAY0GK9A", Codename: "crosshatch", DiscoveryType: ADBDiscovered}
+	testDeviceFastboot := &Device{ID: "8AAY0GK9A", Codename: "crosshatch", DiscoveryType: FastbootDiscovered}
 
 	tests := map[string]struct {
 		device  *Device
@@ -38,6 +40,21 @@ func TestFlash(t *testing.T) {
 				mockFactoryImage.EXPECT().FlashAll(platformtools.PlatformToolsPath("/tmp")).Return(nil)
 				mockFastboot.EXPECT().SetBootloaderLockStatus(testDevice.ID, fastboot.Locked).Return(nil)
 				mockFastboot.EXPECT().Reboot(testDevice.ID).Return(nil)
+				mockADB.EXPECT().KillServer()
+			},
+			expectedErr: nil,
+		},
+		"device discovered through fastboot skips adb reboot": {
+			device: testDeviceFastboot,
+			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
+				mockFactoryImage.EXPECT().Validate(testDeviceFastboot.Codename).Return(nil)
+				mockFastboot.EXPECT().GetBootloaderLockStatus(testDeviceFastboot.ID).Return(fastboot.Locked, nil)
+				mockFastboot.EXPECT().SetBootloaderLockStatus(testDeviceFastboot.ID, fastboot.Unlocked).Return(nil)
+				mockPlatformTools.EXPECT().Path().Return(platformtools.PlatformToolsPath("/tmp"))
+				mockFactoryImage.EXPECT().FlashAll(platformtools.PlatformToolsPath("/tmp")).Return(nil)
+				mockFastboot.EXPECT().SetBootloaderLockStatus(testDeviceFastboot.ID, fastboot.Locked).Return(nil)
+				mockFastboot.EXPECT().Reboot(testDeviceFastboot.ID).Return(nil)
 				mockADB.EXPECT().KillServer()
 			},
 			expectedErr: nil,
@@ -185,21 +202,59 @@ func TestFlash(t *testing.T) {
 func TestDiscoverDevices(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
+	testDeviceADB := &Device{ID: "serialadb", Codename: "adb", DiscoveryType: ADBDiscovered}
+	testDuplicateFastboot := &Device{ID: "serialadb", Codename: "fastboot", DiscoveryType: FastbootDiscovered}
+	testDeviceFastboot := &Device{ID: "serialfastboot", Codename: "fastboot", DiscoveryType: FastbootDiscovered}
+
 	tests := map[string]struct {
 		device  *Device
 		prepare func(*mocks.MockFactoryImageFlasher, *mocks.MockPlatformToolsFlasher,
 			*mocks.MockADBFlasher, *mocks.MockFastbootFlasher)
 		expectedErr     error
-		expectedDevices []*Device
+		expectedDevices map[string]*Device
 	}{
-		"discovery successful with default device": {
+		"discovery successful with adb device": {
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
 				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
-				mockADB.EXPECT().GetDeviceIds().Return([]string{testDevice.ID}, nil)
-				mockADB.EXPECT().GetDeviceCodename(testDevice.ID).Return(testDevice.Codename, nil)
+				mockADB.EXPECT().GetDeviceIds().Return([]string{testDeviceADB.ID}, nil)
+				mockFastboot.EXPECT().GetDeviceIds().Return(nil, nil)
+				mockADB.EXPECT().GetDeviceCodename(testDeviceADB.ID).Return(testDeviceADB.Codename, nil)
 			},
 			expectedErr:     nil,
-			expectedDevices: []*Device{testDevice},
+			expectedDevices: map[string]*Device{testDeviceADB.ID: testDeviceADB},
+		},
+		"discovery successful with fastboot device": {
+			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
+				mockADB.EXPECT().GetDeviceIds().Return(nil, nil)
+				mockFastboot.EXPECT().GetDeviceIds().Return([]string{testDeviceFastboot.ID}, nil)
+				mockFastboot.EXPECT().GetDeviceCodename(testDeviceFastboot.ID).Return(testDeviceFastboot.Codename, nil)
+			},
+			expectedErr:     nil,
+			expectedDevices: map[string]*Device{testDeviceFastboot.ID: testDeviceFastboot},
+		},
+		"discovery successful with both adb and fastboot devices": {
+			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
+				mockADB.EXPECT().GetDeviceIds().Return([]string{testDeviceADB.ID}, nil)
+				mockADB.EXPECT().GetDeviceCodename(testDeviceADB.ID).Return(testDeviceADB.Codename, nil)
+				mockFastboot.EXPECT().GetDeviceIds().Return([]string{testDeviceFastboot.ID}, nil)
+				mockFastboot.EXPECT().GetDeviceCodename(testDeviceFastboot.ID).Return(testDeviceFastboot.Codename, nil)
+			},
+			expectedErr:     nil,
+			expectedDevices: map[string]*Device{
+				testDeviceADB.ID: testDeviceADB,
+				testDeviceFastboot.ID: testDeviceFastboot,
+			},
+		},
+		"discovery fails when get device returns empty for both adb and fastboot": {
+			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
+				mockADB.EXPECT().GetDeviceIds().Return([]string{}, nil)
+				mockFastboot.EXPECT().GetDeviceIds().Return([]string{}, nil)
+			},
+			expectedErr:     ErrNoDevicesFound,
+			expectedDevices: nil,
 		},
 		"discovery fails when get device fails for both adb and fastboot": {
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
@@ -210,16 +265,27 @@ func TestDiscoverDevices(t *testing.T) {
 			expectedErr:     ErrNoDevicesFound,
 			expectedDevices: nil,
 		},
-		"discovery successful if adb fails and then fastboot succeeds": {
+		"duplicate fastboot device overwrites existing adb device": {
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
 				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
-				mockADB.EXPECT().GetDeviceIds().Return(nil, errors.New("failed"))
-				mockADB.EXPECT().GetDeviceCodename(testDevice.ID).Return("", errors.New("failed"))
-				mockFastboot.EXPECT().GetDeviceIds().Return([]string{testDevice.ID}, nil)
-				mockFastboot.EXPECT().GetDeviceCodename(testDevice.ID).Return(testDevice.Codename, nil)
+				mockADB.EXPECT().GetDeviceIds().Return([]string{testDeviceADB.ID}, nil)
+				mockADB.EXPECT().GetDeviceCodename(testDeviceADB.ID).Return(testDeviceADB.Codename, nil)
+				mockFastboot.EXPECT().GetDeviceIds().Return([]string{testDuplicateFastboot.ID}, nil)
+				mockFastboot.EXPECT().GetDeviceCodename(testDuplicateFastboot.ID).Return(testDuplicateFastboot.Codename, nil)
 			},
 			expectedErr:     nil,
-			expectedDevices: []*Device{testDevice},
+			expectedDevices: map[string]*Device{testDuplicateFastboot.ID: testDuplicateFastboot},
+		},
+		"device in not added if get codename fails": {
+			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
+				mockADB.EXPECT().GetDeviceIds().Return([]string{testDeviceADB.ID}, nil)
+				mockADB.EXPECT().GetDeviceCodename(testDeviceADB.ID).Return("", errors.New("fail"))
+				mockFastboot.EXPECT().GetDeviceIds().Return([]string{testDeviceFastboot.ID}, nil)
+				mockFastboot.EXPECT().GetDeviceCodename(testDeviceFastboot.ID).Return("",  errors.New("fail"))
+			},
+			expectedErr:     ErrNoDevicesFound,
+			expectedDevices: nil,
 		},
 	}
 
