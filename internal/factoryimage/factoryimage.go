@@ -51,13 +51,15 @@ func New(config *Config) (*FactoryImage, error) {
 }
 
 func (f *FactoryImage) FlashAll(platformToolsPath platformtools.PlatformToolsPath) error {
-	path := os.Getenv("PATH")
-	newPath := string(platformToolsPath) + string(os.PathListSeparator) + path
+	pathEnvironmentVariable := "PATH"
 	if f.hostOS == "windows" {
-		newPath = string(platformToolsPath) + string(os.PathListSeparator) + path
+		pathEnvironmentVariable = "Path"
 	}
+	
+	path := os.Getenv(pathEnvironmentVariable)
+	newPath := string(platformToolsPath) + string(os.PathListSeparator) + path
 	f.logger.WithField("newPath", newPath).Info("adding platform tools to PATH")
-	err := os.Setenv("PATH", newPath)
+	err := os.Setenv(pathEnvironmentVariable, newPath)
 	if err != nil {
 		return err
 	}
