@@ -55,7 +55,7 @@ func (f *FactoryImage) FlashAll(platformToolsPath platformtools.PlatformToolsPat
 	if f.hostOS == "windows" {
 		pathEnvironmentVariable = "Path"
 	}
-	
+
 	path := os.Getenv(pathEnvironmentVariable)
 	newPath := string(platformToolsPath) + string(os.PathListSeparator) + path
 	f.logger.WithField("newPath", newPath).Info("adding platform tools to PATH")

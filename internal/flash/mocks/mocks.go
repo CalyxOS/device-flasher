@@ -166,6 +166,20 @@ func (mr *MockADBFlasherMockRecorder) KillServer() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "KillServer", reflect.TypeOf((*MockADBFlasher)(nil).KillServer))
 }
 
+// Name mocks base method
+func (m *MockADBFlasher) Name() platformtools.ToolName {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Name")
+	ret0, _ := ret[0].(platformtools.ToolName)
+	return ret0
+}
+
+// Name indicates an expected call of Name
+func (mr *MockADBFlasherMockRecorder) Name() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockADBFlasher)(nil).Name))
+}
+
 // RebootIntoBootloader mocks base method
 func (m *MockADBFlasher) RebootIntoBootloader(arg0 string) error {
 	m.ctrl.T.Helper()
@@ -246,6 +260,20 @@ func (m *MockFastbootFlasher) GetDeviceIds() ([]string, error) {
 func (mr *MockFastbootFlasherMockRecorder) GetDeviceIds() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDeviceIds", reflect.TypeOf((*MockFastbootFlasher)(nil).GetDeviceIds))
+}
+
+// Name mocks base method
+func (m *MockFastbootFlasher) Name() platformtools.ToolName {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Name")
+	ret0, _ := ret[0].(platformtools.ToolName)
+	return ret0
+}
+
+// Name indicates an expected call of Name
+func (mr *MockFastbootFlasherMockRecorder) Name() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockFastbootFlasher)(nil).Name))
 }
 
 // Reboot mocks base method

@@ -24,6 +24,13 @@ const (
 
 type PlatformToolsPath string
 
+type ToolName string
+
+const (
+	ADB ToolName = "adb"
+	Fastboot ToolName = "fastboot"
+)
+
 type Config struct {
 	BaseURI              string
 	HttpClient           *http.Client

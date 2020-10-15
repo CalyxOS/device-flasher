@@ -11,6 +11,8 @@ import (
 
 var (
 	ErrNoDevicesFound = errors.New("no devices detected with adb or fastboot")
+	ErrGetDevices = errors.New("unable to get devices")
+	ErrGetDeviceCodename = errors.New("unable to get device codename")
 )
 
 type FactoryImageFlasher interface {
@@ -25,12 +27,14 @@ type PlatformToolsFlasher interface {
 type DeviceDiscoverer interface {
 	GetDeviceIds() ([]string, error)
 	GetDeviceCodename(deviceId string) (string, error)
+	Name() platformtools.ToolName
 }
 
 type ADBFlasher interface {
 	DeviceDiscoverer
 	RebootIntoBootloader(deviceId string) error
 	KillServer() error
+	Name() platformtools.ToolName
 }
 
 type FastbootFlasher interface {
@@ -38,6 +42,7 @@ type FastbootFlasher interface {
 	SetBootloaderLockStatus(deviceId string, wanted fastboot.FastbootLockStatus) error
 	GetBootloaderLockStatus(deviceId string) (fastboot.FastbootLockStatus, error)
 	Reboot(deviceId string) error
+	Name() platformtools.ToolName
 }
 
 type Config struct {
@@ -81,7 +86,7 @@ func (f *Flash) Flash(device *Device) error {
 		return err
 	}
 
-	if device.DiscoveryType == ADBDiscovered {
+	if device.DiscoveryTool == platformtools.ADB {
 		logger.Info("reboot into bootloader")
 		err = f.adb.RebootIntoBootloader(device.ID)
 		if err != nil {
@@ -128,28 +133,16 @@ func (f *Flash) Flash(device *Device) error {
 }
 
 func (f *Flash) DiscoverDevices() (map[string]*Device, error) {
-	devices := map[string]*Device{}
-	f.logger.Debug("running adb get devices")
-	adbDeviceIds, err := f.adb.GetDeviceIds()
+	f.logger.Infof("getting adb devices")
+	devices, err := f.getDevices(f.adb)
 	if err != nil {
-		f.logger.Infof("unable to get adb devices: %v", err)
-	} else {
-		devices, err = f.generateDevices(adbDeviceIds, f.adb, ADBDiscovered)
-		if err != nil {
-			return nil, err
-		}
+		f.logger.Warn(err)
 	}
 
-	fastbootDevices := map[string]*Device{}
-	f.logger.Debug("running fastboot get devices")
-	fastbootDeviceIds, err := f.fastboot.GetDeviceIds()
+	f.logger.Infof("getting fastboot devices")
+	fastbootDevices, err := f.getDevices(f.fastboot)
 	if err != nil {
-		f.logger.Infof("unable to get fastboot devices: %v", err)
-	} else {
-		fastbootDevices, err = f.generateDevices(fastbootDeviceIds, f.fastboot, FastbootDiscovered)
-		if err != nil {
-			return nil, err
-		}
+		f.logger.Warn(err)
 	}
 
 	for k, v := range fastbootDevices {
@@ -163,23 +156,28 @@ func (f *Flash) DiscoverDevices() (map[string]*Device, error) {
 	return devices, nil
 }
 
-func (f *Flash) generateDevices(deviceIds []string, tool DeviceDiscoverer, discoverType DiscoveryType) (map[string]*Device, error) {
+func (f *Flash) getDevices(tool DeviceDiscoverer) (map[string]*Device, error) {
+	toolName := tool.Name()
 	devices := map[string]*Device{}
+	deviceIds, err := tool.GetDeviceIds()
+	if err != nil {
+		return nil, fmt.Errorf("%v %w: %v", string(toolName), ErrGetDevices, err)
+	}
 	for _, deviceId := range deviceIds {
-		f.logger.Debugf("getting code name for device %v", deviceId)
+		f.logger.Debugf("%v getting code name for device %v", string(toolName), deviceId)
 		deviceCodename, err := tool.GetDeviceCodename(deviceId)
 		if err != nil {
-			f.logger.Warnf("skipping device %v as getting code name failed: %v", deviceId, err)
+			f.logger.Warnf("%v skipping device %v as getting code name failed: %v", string(toolName), deviceId, err)
 			continue
 		}
 		if _, ok := devices[deviceId]; ok {
-			f.logger.Warnf("skipping duplicate device %v", deviceId)
+			f.logger.Warnf("%v skipping duplicate device %v", string(toolName), deviceId)
 			continue
 		}
 		devices[deviceId] = &Device{
 			ID: deviceId,
 			Codename: deviceCodename,
-			DiscoveryType: discoverType,
+			DiscoveryTool: toolName,
 		}
 	}
 	return devices, nil

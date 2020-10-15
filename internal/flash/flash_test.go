@@ -19,8 +19,8 @@ var (
 func TestFlash(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
-	testDevice := &Device{ID: "8AAY0GK9A", Codename: "crosshatch", DiscoveryType: ADBDiscovered}
-	testDeviceFastboot := &Device{ID: "8AAY0GK9A", Codename: "crosshatch", DiscoveryType: FastbootDiscovered}
+	testDevice := &Device{ID: "8AAY0GK9A", Codename: "crosshatch", DiscoveryTool: platformtools.ADB}
+	testDeviceFastboot := &Device{ID: "8AAY0GK9A", Codename: "crosshatch", DiscoveryTool: platformtools.Fastboot}
 
 	tests := map[string]struct {
 		device  *Device
@@ -202,9 +202,9 @@ func TestFlash(t *testing.T) {
 func TestDiscoverDevices(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
-	testDeviceADB := &Device{ID: "serialadb", Codename: "adb", DiscoveryType: ADBDiscovered}
-	testDuplicateFastboot := &Device{ID: "serialadb", Codename: "fastboot", DiscoveryType: FastbootDiscovered}
-	testDeviceFastboot := &Device{ID: "serialfastboot", Codename: "fastboot", DiscoveryType: FastbootDiscovered}
+	testDeviceADB := &Device{ID: "serialadb", Codename: "adb", DiscoveryTool: platformtools.ADB}
+	testDuplicateFastboot := &Device{ID: "serialadb", Codename: "fastboot", DiscoveryTool: platformtools.Fastboot}
+	testDeviceFastboot := &Device{ID: "serialfastboot", Codename: "fastboot", DiscoveryTool: platformtools.Fastboot}
 
 	tests := map[string]struct {
 		device  *Device
@@ -217,8 +217,10 @@ func TestDiscoverDevices(t *testing.T) {
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
 				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
 				mockADB.EXPECT().GetDeviceIds().Return([]string{testDeviceADB.ID}, nil)
-				mockFastboot.EXPECT().GetDeviceIds().Return(nil, nil)
 				mockADB.EXPECT().GetDeviceCodename(testDeviceADB.ID).Return(testDeviceADB.Codename, nil)
+				mockFastboot.EXPECT().GetDeviceIds().Return(nil, nil)
+				mockADB.EXPECT().Name().Return(platformtools.ADB)
+				mockFastboot.EXPECT().Name().Return(platformtools.Fastboot)
 			},
 			expectedErr:     nil,
 			expectedDevices: map[string]*Device{testDeviceADB.ID: testDeviceADB},
@@ -229,6 +231,8 @@ func TestDiscoverDevices(t *testing.T) {
 				mockADB.EXPECT().GetDeviceIds().Return(nil, nil)
 				mockFastboot.EXPECT().GetDeviceIds().Return([]string{testDeviceFastboot.ID}, nil)
 				mockFastboot.EXPECT().GetDeviceCodename(testDeviceFastboot.ID).Return(testDeviceFastboot.Codename, nil)
+				mockADB.EXPECT().Name().Return(platformtools.ADB)
+				mockFastboot.EXPECT().Name().Return(platformtools.Fastboot)
 			},
 			expectedErr:     nil,
 			expectedDevices: map[string]*Device{testDeviceFastboot.ID: testDeviceFastboot},
@@ -240,6 +244,8 @@ func TestDiscoverDevices(t *testing.T) {
 				mockADB.EXPECT().GetDeviceCodename(testDeviceADB.ID).Return(testDeviceADB.Codename, nil)
 				mockFastboot.EXPECT().GetDeviceIds().Return([]string{testDeviceFastboot.ID}, nil)
 				mockFastboot.EXPECT().GetDeviceCodename(testDeviceFastboot.ID).Return(testDeviceFastboot.Codename, nil)
+				mockADB.EXPECT().Name().Return(platformtools.ADB)
+				mockFastboot.EXPECT().Name().Return(platformtools.Fastboot)
 			},
 			expectedErr:     nil,
 			expectedDevices: map[string]*Device{
@@ -252,6 +258,8 @@ func TestDiscoverDevices(t *testing.T) {
 				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
 				mockADB.EXPECT().GetDeviceIds().Return([]string{}, nil)
 				mockFastboot.EXPECT().GetDeviceIds().Return([]string{}, nil)
+				mockADB.EXPECT().Name().Return(platformtools.ADB)
+				mockFastboot.EXPECT().Name().Return(platformtools.Fastboot)
 			},
 			expectedErr:     ErrNoDevicesFound,
 			expectedDevices: nil,
@@ -261,6 +269,8 @@ func TestDiscoverDevices(t *testing.T) {
 				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
 				mockADB.EXPECT().GetDeviceIds().Return(nil, errors.New("failed"))
 				mockFastboot.EXPECT().GetDeviceIds().Return(nil, errors.New("failed"))
+				mockADB.EXPECT().Name().Return(platformtools.ADB)
+				mockFastboot.EXPECT().Name().Return(platformtools.Fastboot)
 			},
 			expectedErr:     ErrNoDevicesFound,
 			expectedDevices: nil,
@@ -272,6 +282,8 @@ func TestDiscoverDevices(t *testing.T) {
 				mockADB.EXPECT().GetDeviceCodename(testDeviceADB.ID).Return(testDeviceADB.Codename, nil)
 				mockFastboot.EXPECT().GetDeviceIds().Return([]string{testDuplicateFastboot.ID}, nil)
 				mockFastboot.EXPECT().GetDeviceCodename(testDuplicateFastboot.ID).Return(testDuplicateFastboot.Codename, nil)
+				mockADB.EXPECT().Name().Return(platformtools.ADB)
+				mockFastboot.EXPECT().Name().Return(platformtools.Fastboot)
 			},
 			expectedErr:     nil,
 			expectedDevices: map[string]*Device{testDuplicateFastboot.ID: testDuplicateFastboot},
@@ -283,6 +295,8 @@ func TestDiscoverDevices(t *testing.T) {
 				mockADB.EXPECT().GetDeviceCodename(testDeviceADB.ID).Return("", errors.New("fail"))
 				mockFastboot.EXPECT().GetDeviceIds().Return([]string{testDeviceFastboot.ID}, nil)
 				mockFastboot.EXPECT().GetDeviceCodename(testDeviceFastboot.ID).Return("",  errors.New("fail"))
+				mockADB.EXPECT().Name().Return(platformtools.ADB)
+				mockFastboot.EXPECT().Name().Return(platformtools.Fastboot)
 			},
 			expectedErr:     ErrNoDevicesFound,
 			expectedDevices: nil,

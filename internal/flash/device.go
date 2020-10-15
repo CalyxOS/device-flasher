@@ -1,13 +1,9 @@
 package flash
 
-type DiscoveryType int
+import "gitlab.com/calyxos/device-flasher/internal/platformtools"
 
-const (
-	ADBDiscovered DiscoveryType = iota
-	FastbootDiscovered
-)
 type Device struct {
 	ID       string
 	Codename string
-	DiscoveryType DiscoveryType
+	DiscoveryTool platformtools.ToolName
 }

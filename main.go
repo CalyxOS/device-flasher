@@ -116,6 +116,11 @@ func execute(name, image, toolsVersion, hostOS string, logger *logrus.Logger) er
 		return err
 	}
 
+	logger.Info("detected the following devices:")
+	for _, device := range devices {
+		logger.Infof("  id:%v codename:%v discovery:%v", device.ID, device.Codename, device.DiscoveryTool)
+	}
+
 	logger.Info("running flash devices")
 	for _, device := range devices {
 		err = flashTool.Flash(device)
