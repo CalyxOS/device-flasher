@@ -13,13 +13,6 @@ import (
 
 type PlatformToolsPath string
 
-type ToolName string
-
-const (
-	ADB      ToolName = "adb"
-	Fastboot ToolName = "fastboot"
-)
-
 type Config struct {
 	CacheDir             string
 	BaseURI              string

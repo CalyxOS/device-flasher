@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	adbExecutable = platformtools.ADB
+	adbExecutable = "adb"
 )
 
 type Tool struct {
@@ -18,7 +18,7 @@ type Tool struct {
 }
 
 func New(path platformtools.PlatformToolsPath, hostOS string) (*Tool, error) {
-	executable := filepath.Join(string(path), string(adbExecutable))
+	executable := filepath.Join(string(path), adbExecutable)
 	if hostOS == "windows" {
 		executable = executable + ".exe"
 	}
@@ -72,7 +72,7 @@ func (t *Tool) KillServer() error {
 	return nil
 }
 
-func (t *Tool) Name() platformtools.ToolName {
+func (t *Tool) Name() string {
 	return adbExecutable
 }
 

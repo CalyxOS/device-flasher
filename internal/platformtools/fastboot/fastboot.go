@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	fastbootExecutable = platformtools.Fastboot
+	fastbootExecutable = "fastboot"
 )
 
 var (
@@ -37,7 +37,7 @@ type Tool struct {
 }
 
 func New(path platformtools.PlatformToolsPath, hostOS string) (*Tool, error) {
-	executable := filepath.Join(string(path), string(fastbootExecutable))
+	executable := filepath.Join(string(path), fastbootExecutable)
 	if hostOS == "windows" {
 		executable = executable + ".exe"
 	}
@@ -115,7 +115,7 @@ func (t *Tool) Reboot(deviceId string) error {
 	return nil
 }
 
-func (t *Tool) Name() platformtools.ToolName {
+func (t *Tool) Name() string {
 	return fastbootExecutable
 }
 

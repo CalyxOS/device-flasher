@@ -6,6 +6,7 @@ package mocks
 
 import (
 	gomock "github.com/golang/mock/gomock"
+	devicediscovery "gitlab.com/calyxos/device-flasher/internal/devicediscovery"
 	platformtools "gitlab.com/calyxos/device-flasher/internal/platformtools"
 	fastboot "gitlab.com/calyxos/device-flasher/internal/platformtools/fastboot"
 	reflect "reflect"
@@ -49,7 +50,7 @@ func (mr *MockFactoryImageFlasherMockRecorder) FlashAll(arg0 interface{}) *gomoc
 }
 
 // Validate mocks base method
-func (m *MockFactoryImageFlasher) Validate(arg0 string) error {
+func (m *MockFactoryImageFlasher) Validate(arg0 devicediscovery.Codename) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Validate", arg0)
 	ret0, _ := ret[0].(error)
@@ -122,36 +123,6 @@ func (m *MockADBFlasher) EXPECT() *MockADBFlasherMockRecorder {
 	return m.recorder
 }
 
-// GetDeviceCodename mocks base method
-func (m *MockADBFlasher) GetDeviceCodename(arg0 string) (string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetDeviceCodename", arg0)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetDeviceCodename indicates an expected call of GetDeviceCodename
-func (mr *MockADBFlasherMockRecorder) GetDeviceCodename(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDeviceCodename", reflect.TypeOf((*MockADBFlasher)(nil).GetDeviceCodename), arg0)
-}
-
-// GetDeviceIds mocks base method
-func (m *MockADBFlasher) GetDeviceIds() ([]string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetDeviceIds")
-	ret0, _ := ret[0].([]string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetDeviceIds indicates an expected call of GetDeviceIds
-func (mr *MockADBFlasherMockRecorder) GetDeviceIds() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDeviceIds", reflect.TypeOf((*MockADBFlasher)(nil).GetDeviceIds))
-}
-
 // KillServer mocks base method
 func (m *MockADBFlasher) KillServer() error {
 	m.ctrl.T.Helper()
@@ -164,20 +135,6 @@ func (m *MockADBFlasher) KillServer() error {
 func (mr *MockADBFlasherMockRecorder) KillServer() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "KillServer", reflect.TypeOf((*MockADBFlasher)(nil).KillServer))
-}
-
-// Name mocks base method
-func (m *MockADBFlasher) Name() platformtools.ToolName {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Name")
-	ret0, _ := ret[0].(platformtools.ToolName)
-	return ret0
-}
-
-// Name indicates an expected call of Name
-func (mr *MockADBFlasherMockRecorder) Name() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockADBFlasher)(nil).Name))
 }
 
 // RebootIntoBootloader mocks base method
@@ -230,50 +187,6 @@ func (m *MockFastbootFlasher) GetBootloaderLockStatus(arg0 string) (fastboot.Fas
 func (mr *MockFastbootFlasherMockRecorder) GetBootloaderLockStatus(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBootloaderLockStatus", reflect.TypeOf((*MockFastbootFlasher)(nil).GetBootloaderLockStatus), arg0)
-}
-
-// GetDeviceCodename mocks base method
-func (m *MockFastbootFlasher) GetDeviceCodename(arg0 string) (string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetDeviceCodename", arg0)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetDeviceCodename indicates an expected call of GetDeviceCodename
-func (mr *MockFastbootFlasherMockRecorder) GetDeviceCodename(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDeviceCodename", reflect.TypeOf((*MockFastbootFlasher)(nil).GetDeviceCodename), arg0)
-}
-
-// GetDeviceIds mocks base method
-func (m *MockFastbootFlasher) GetDeviceIds() ([]string, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetDeviceIds")
-	ret0, _ := ret[0].([]string)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetDeviceIds indicates an expected call of GetDeviceIds
-func (mr *MockFastbootFlasherMockRecorder) GetDeviceIds() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDeviceIds", reflect.TypeOf((*MockFastbootFlasher)(nil).GetDeviceIds))
-}
-
-// Name mocks base method
-func (m *MockFastbootFlasher) Name() platformtools.ToolName {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Name")
-	ret0, _ := ret[0].(platformtools.ToolName)
-	return ret0
-}
-
-// Name indicates an expected call of Name
-func (mr *MockFastbootFlasherMockRecorder) Name() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Name", reflect.TypeOf((*MockFastbootFlasher)(nil).Name))
 }
 
 // Reboot mocks base method

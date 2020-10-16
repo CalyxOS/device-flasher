@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"gitlab.com/calyxos/device-flasher/internal/devicediscovery"
 	"gitlab.com/calyxos/device-flasher/internal/factoryimage"
 	"gitlab.com/calyxos/device-flasher/internal/flash"
 	"gitlab.com/calyxos/device-flasher/internal/platformtools"
@@ -114,22 +115,13 @@ func execute(name, image, toolsVersion, hostOS string, logger *logrus.Logger) er
 		return err
 	}
 
-	flashTool := flash.New(&flash.Config{
-		HostOS:        hostOS,
-		FactoryImage:  factoryImage,
-		PlatformTools: platformTools,
-		ADB:           adbTool,
-		Fastboot:      fastbootTool,
-		Logger:        logger,
-	})
-
-	logger.Info("Connect to a wifi network and ensure that no SIM cards are installed")
-	logger.Info("Enable Developer Options on device (Settings -> About Phone -> tap \"Build number\" 7 times)")
-	logger.Info("Enable USB debugging on device (Settings -> System -> Advanced -> Developer Options) and allow the computer to debug (hit \"OK\" on the popup when USB is connected)")
-	logger.Info("Enable OEM Unlocking (in the same Developer Options menu)")
-	logger.Warn("When done, press enter to continue")
+	logger.Info("-> Connect to a wifi network and ensure that no SIM cards are installed")
+	logger.Info("-> Enable Developer Options on device (Settings -> About Phone -> tap \"Build number\" 7 times)")
+	logger.Info("-> Enable USB debugging on device (Settings -> System -> Advanced -> Developer Options) and allow the computer to debug (hit \"OK\" on the popup when USB is connected)")
+	logger.Info("-> Enable OEM Unlocking (in the same Developer Options menu)")
+	logger.Warn("Press ENTER to continue")
 	_, _ = fmt.Scanln()
-	devicesMap, err := flashTool.DiscoverDevices()
+	devicesMap, err := devicediscovery.New(adbTool, fastbootTool, logger).DiscoverDevices()
 	if err != nil {
 		return err
 	}
@@ -138,10 +130,18 @@ func execute(name, image, toolsVersion, hostOS string, logger *logrus.Logger) er
 	for _, device := range devicesMap {
 		logger.Infof(" id=%v codename=%v (%v)", device.ID, device.Codename, device.DiscoveryTool)
 	}
-	logger.Warn("Press enter to start flashing process")
+	logger.Warn("Press ENTER to continue")
 	_, _ = fmt.Scanln()
 
 	// keep serial for the time being until everything is working
+	flashTool := flash.New(&flash.Config{
+		HostOS:        hostOS,
+		FactoryImage:  factoryImage,
+		PlatformTools: platformTools,
+		ADB:           adbTool,
+		Fastboot:      fastbootTool,
+		Logger:        logger,
+	})
 	for _, device := range devicesMap {
 		deviceLogger := logger.WithFields(logrus.Fields{
 			"deviceId":       device.ID,

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/mholt/archiver/v3"
 	"github.com/sirupsen/logrus"
+	"gitlab.com/calyxos/device-flasher/internal/devicediscovery"
 	"gitlab.com/calyxos/device-flasher/internal/platformtools"
 	"io/ioutil"
 	"os"
@@ -79,14 +80,14 @@ func (f *FactoryImage) FlashAll(platformToolsPath platformtools.PlatformToolsPat
 	return nil
 }
 
-func (f *FactoryImage) Validate(deviceCodename string) error {
+func (f *FactoryImage) Validate(deviceCodename devicediscovery.Codename) error {
 	f.logger.WithFields(logrus.Fields{
 		"deviceCodename": deviceCodename,
 	}).Info("running factory image validation")
 	if _, err := os.Stat(f.imagePath); os.IsNotExist(err) {
 		return fmt.Errorf("%w: %v", ErrorValidation, err)
 	}
-	if !strings.Contains(f.imagePath, strings.ToLower(deviceCodename)) {
+	if !strings.Contains(f.imagePath, strings.ToLower(string(deviceCodename))) {
 		return fmt.Errorf("%w: image filename should contain device codename %v", ErrorValidation, deviceCodename)
 	}
 	if !strings.HasSuffix(f.imagePath, ".zip") {
@@ -116,7 +117,6 @@ func (f *FactoryImage) extract() error {
 	f.logger.WithFields(logrus.Fields{
 		"name":             f.name,
 		"imagePath":        f.imagePath,
-		"workingDirectory": f.workingDirectory,
 	}).Info("extracting factory image")
 	err := archiver.Unarchive(f.imagePath, f.workingDirectory)
 	if err != nil {
