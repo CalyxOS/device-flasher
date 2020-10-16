@@ -50,6 +50,15 @@ func (d *Discovery) DiscoverDevices() (map[string]*Device, error) {
 		devices[k] = v
 	}
 
+	for _, v := range devices {
+		if rename, ok := CustomFlashHooks[v.Codename]; ok {
+			if rename.RenameCodename != "" {
+				d.logger.Debugf("custom renaming codename %v to %v", v.Codename, rename.RenameCodename)
+				v.Codename = rename.RenameCodename
+			}
+		}
+	}
+
 	if len(devices) == 0 {
 		return nil, ErrNoDevicesFound
 	}

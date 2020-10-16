@@ -5,18 +5,19 @@ import (
 )
 
 var CustomFlashHooks = map[Codename]*FlashHooks{
-	Codename("jasmine"): &FlashHooks{
-		HookPreUnlock: additionalLockUnlockStep,
-		HookPreLock: additionalLockUnlockStep,
+	Codename("crosshatch"): &FlashHooks{
+		RenameCodename: Codename("jasmin_sprout"),
+		LoggingHookPreUnlock: additionalLockUnlockStep,
+		LoggingHookPreLock: additionalLockUnlockStep,
 	},
 	Codename("walleye"): &FlashHooks{
-		HookPreUnlock: additionalLockUnlockStep,
-		HookPreLock: additionalLockUnlockStep,
+		LoggingHookPreUnlock: additionalLockUnlockStep,
+		LoggingHookPreLock: additionalLockUnlockStep,
 	},
 }
 
 type Codename string
-type Hook func(logger *logrus.Logger) error
+type LoggingHook func(logger *logrus.Logger) error
 
 func additionalLockUnlockStep(logger *logrus.Logger) error {
 	logger.Info("-> Once device boots, disconnect its cable and power it off")
@@ -26,8 +27,9 @@ func additionalLockUnlockStep(logger *logrus.Logger) error {
 }
 
 type FlashHooks struct {
-	HookPreUnlock Hook
-	HookPreLock   Hook
+	RenameCodename       Codename
+	LoggingHookPreUnlock LoggingHook
+	LoggingHookPreLock   LoggingHook
 }
 
 type ToolName string
