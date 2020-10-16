@@ -14,7 +14,7 @@ const (
 
 type Tool struct {
 	executable string
-	hostOS string
+	hostOS     string
 }
 
 func New(path platformtools.PlatformToolsPath, hostOS string) (*Tool, error) {
@@ -27,7 +27,7 @@ func New(path platformtools.PlatformToolsPath, hostOS string) (*Tool, error) {
 	}
 	return &Tool{
 		executable: executable,
-		hostOS: hostOS,
+		hostOS:     hostOS,
 	}, nil
 }
 
@@ -50,6 +50,14 @@ func (t *Tool) GetDeviceCodename(deviceId string) (string, error) {
 
 func (t *Tool) RebootIntoBootloader(deviceId string) error {
 	_, err := t.command([]string{"-s", deviceId, "reboot", "bootloader"})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (t *Tool) StartServer() error {
+	_, err := t.command([]string{"start-server"})
 	if err != nil {
 		return err
 	}

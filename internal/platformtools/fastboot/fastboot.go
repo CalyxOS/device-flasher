@@ -33,7 +33,7 @@ const (
 
 type Tool struct {
 	executable string
-	hostOS string
+	hostOS     string
 }
 
 func New(path platformtools.PlatformToolsPath, hostOS string) (*Tool, error) {

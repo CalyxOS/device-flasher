@@ -10,8 +10,8 @@ import (
 )
 
 var (
-	ErrNoDevicesFound = errors.New("no devices detected with adb or fastboot")
-	ErrGetDevices = errors.New("unable to get devices")
+	ErrNoDevicesFound    = errors.New("no devices detected with adb or fastboot")
+	ErrGetDevices        = errors.New("unable to get devices")
 	ErrGetDeviceCodename = errors.New("unable to get device codename")
 )
 
@@ -111,7 +111,7 @@ func (f *Flash) Flash(device *Device) error {
 	logger.Info("running flash all script")
 	err = f.factoryImage.FlashAll(f.platformTools.Path())
 	if err != nil {
-		return fmt.Errorf("failed to flash device %v: %w", device.ID, err)
+		return err
 	}
 	logger.Info("finished running flash all script")
 
@@ -127,7 +127,6 @@ func (f *Flash) Flash(device *Device) error {
 	if err != nil {
 		logger.Warnf("failed to reboot device: %v. may need to manually reboot", err)
 	}
-	logger.Info("finished flashing device")
 
 	return nil
 }
@@ -175,8 +174,8 @@ func (f *Flash) getDevices(tool DeviceDiscoverer) (map[string]*Device, error) {
 			continue
 		}
 		devices[deviceId] = &Device{
-			ID: deviceId,
-			Codename: deviceCodename,
+			ID:            deviceId,
+			Codename:      deviceCodename,
 			DiscoveryTool: toolName,
 		}
 	}

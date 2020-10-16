@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	testOS     = "TestOS"
+	testOS = "TestOS"
 )
 
 func TestFlash(t *testing.T) {
@@ -247,9 +247,9 @@ func TestDiscoverDevices(t *testing.T) {
 				mockADB.EXPECT().Name().Return(platformtools.ADB)
 				mockFastboot.EXPECT().Name().Return(platformtools.Fastboot)
 			},
-			expectedErr:     nil,
+			expectedErr: nil,
 			expectedDevices: map[string]*Device{
-				testDeviceADB.ID: testDeviceADB,
+				testDeviceADB.ID:      testDeviceADB,
 				testDeviceFastboot.ID: testDeviceFastboot,
 			},
 		},
@@ -294,7 +294,7 @@ func TestDiscoverDevices(t *testing.T) {
 				mockADB.EXPECT().GetDeviceIds().Return([]string{testDeviceADB.ID}, nil)
 				mockADB.EXPECT().GetDeviceCodename(testDeviceADB.ID).Return("", errors.New("fail"))
 				mockFastboot.EXPECT().GetDeviceIds().Return([]string{testDeviceFastboot.ID}, nil)
-				mockFastboot.EXPECT().GetDeviceCodename(testDeviceFastboot.ID).Return("",  errors.New("fail"))
+				mockFastboot.EXPECT().GetDeviceCodename(testDeviceFastboot.ID).Return("", errors.New("fail"))
 				mockADB.EXPECT().Name().Return(platformtools.ADB)
 				mockFastboot.EXPECT().Name().Return(platformtools.Fastboot)
 			},

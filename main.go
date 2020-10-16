@@ -18,9 +18,8 @@ import (
 )
 
 func main() {
-	// TODO: changed to latest as darwin r30.0.2 did not exist
-	// also might be better to just hardcode version in platformtools
-	toolsVersionPtr := flag.String("tools-version", "latest", "platform tools version")
+	toolsVersionPtr := flag.String("tools-version", string(platformtools.Version_30_0_4),
+		fmt.Sprintf("platform tools version. supported: %v", platformtools.SupportedVersions))
 	namePtr := flag.String("name", "CalyxOS", "os name")
 	imagePtr := flag.String("image", "", "factory image to flash")
 	debugPtr := flag.Bool("debug", false, "debug logging")
@@ -44,7 +43,7 @@ func main() {
 func execute(name, image, toolsVersion, hostOS string, logger *logrus.Logger) error {
 	// setup udev if running linux
 	if hostOS == "linux" {
-		err := udev.Setup(logger)
+		err := udev.Setup(logger, udev.DefaultUDevRules)
 		if err != nil {
 			return err
 		}
@@ -70,30 +69,49 @@ func execute(name, image, toolsVersion, hostOS string, logger *logrus.Logger) er
 
 	// platform tools setup
 	logger.Debug("creating temporary directory for platform tools")
-	tmpToolDir, err := ioutil.TempDir("", "device-flasher-platformtools")
+	tmpToolExtractDir, err := ioutil.TempDir("", "device-flasher-extracted-platformtools")
 	if err != nil {
 		return err
 	}
-	defer os.RemoveAll(tmpToolDir)
+	defer os.RemoveAll(tmpToolExtractDir)
+
+	logger.Debug("creating cache dir for downloaded platform tools zips")
+	toolZipCacheDir := fmt.Sprintf("%v%v%v%v", os.TempDir(), string(os.PathSeparator), "platform-tools-", toolsVersion)
+	err = os.MkdirAll(toolZipCacheDir, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("failed to setup tools zip cache dir %v: %w", toolZipCacheDir, err)
+	}
 	platformTools, err := platformtools.New(&platformtools.Config{
+		CacheDir:             toolZipCacheDir,
 		HttpClient:           &http.Client{Timeout: time.Second * 60},
 		HostOS:               hostOS,
 		ToolsVersion:         toolsVersion,
-		DestinationDirectory: tmpToolDir,
+		DestinationDirectory: tmpToolExtractDir,
 		Logger:               logger,
 	})
 	if err != nil {
-		logger.Fatal(err)
+		return err
 	}
 
+	logger.Info("setting up adb")
 	adbTool, err := adb.New(platformTools.Path(), hostOS)
 	if err != nil {
 		logger.Fatal(err)
 	}
+	err = adbTool.KillServer()
+	if err != nil {
+		logger.Debug(err)
+	}
+	err = adbTool.StartServer()
+	if err != nil {
+		logger.Warn(err)
+	}
+	defer adbTool.KillServer()
 
+	logger.Info("setting up fastboot")
 	fastbootTool, err := fastboot.New(platformTools.Path(), hostOS)
 	if err != nil {
-		logger.Fatal(err)
+		return err
 	}
 
 	flashTool := flash.New(&flash.Config{
@@ -111,22 +129,31 @@ func execute(name, image, toolsVersion, hostOS string, logger *logrus.Logger) er
 	logger.Info("Enable OEM Unlocking (in the same Developer Options menu)")
 	logger.Warn("When done, press enter to continue")
 	_, _ = fmt.Scanln()
-	devices, err := flashTool.DiscoverDevices()
+	devicesMap, err := flashTool.DiscoverDevices()
 	if err != nil {
 		return err
 	}
 
-	logger.Info("detected the following devices:")
-	for _, device := range devices {
-		logger.Infof("  id:%v codename:%v discovery:%v", device.ID, device.Codename, device.DiscoveryTool)
+	logger.Info("Discovered the following devices:")
+	for _, device := range devicesMap {
+		logger.Infof(" id=%v codename=%v (%v)", device.ID, device.Codename, device.DiscoveryTool)
 	}
+	logger.Warn("Press enter to start flashing process")
+	_, _ = fmt.Scanln()
 
-	logger.Info("running flash devices")
-	for _, device := range devices {
+	// keep serial for the time being until everything is working
+	for _, device := range devicesMap {
+		deviceLogger := logger.WithFields(logrus.Fields{
+			"deviceId":       device.ID,
+			"deviceCodename": device.Codename,
+		})
+		deviceLogger.Infof("starting to flash device")
 		err = flashTool.Flash(device)
 		if err != nil {
+			deviceLogger.Error(err)
 			return err
 		}
+		deviceLogger.Infof("finished flashing device")
 	}
 	return nil
 }

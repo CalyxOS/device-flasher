@@ -11,27 +11,17 @@ import (
 	"os"
 )
 
-const (
-	DefaultBaseURI                = "https://dl.google.com/android/repository"
-	PlatformToolsFilenameTemplate = "platform-tools-%v-%v.zip"
-)
-
-const (
-	LinuxSha256   = "f7306a7c66d8149c4430aff270d6ed644c720ea29ef799dc613d3dc537485c6e"
-	DarwinSha256  = "ab9dbab873fff677deb2cfd95ea60b9295ebd53b58ec8533e9e1110b2451e540"
-	WindowsSha256 = "265dd7b55f58dff1a5ad5073a92f4a5308bd070b72bd8b0d604674add6db8a41"
-)
-
 type PlatformToolsPath string
 
 type ToolName string
 
 const (
-	ADB ToolName = "adb"
+	ADB      ToolName = "adb"
 	Fastboot ToolName = "fastboot"
 )
 
 type Config struct {
+	CacheDir             string
 	BaseURI              string
 	HttpClient           *http.Client
 	HostOS               string
@@ -41,8 +31,9 @@ type Config struct {
 }
 
 type PlatformTools struct {
+	cacheDir         string
 	httpClient       *http.Client
-	os               string
+	hostOS           string
 	downloadURI      string
 	sha256           string
 	workingDirectory string
@@ -52,27 +43,18 @@ type PlatformTools struct {
 }
 
 func New(config *Config) (*PlatformTools, error) {
-	platformToolsFilename := fmt.Sprintf(PlatformToolsFilenameTemplate, config.ToolsVersion, config.HostOS)
-	downloadURI := fmt.Sprintf("%v/%v", DefaultBaseURI, platformToolsFilename)
 	workingDirectory := config.DestinationDirectory
-	zipFile := fmt.Sprintf("%v/%v", workingDirectory, "platform-tools.zip")
-	path := fmt.Sprintf("%v/platform-tools", workingDirectory)
-
-	var sha256 string
-	switch config.HostOS {
-	case "linux":
-		sha256 = LinuxSha256
-	case "darwin":
-		sha256 = DarwinSha256
-	case "windows":
-		sha256 = WindowsSha256
-	}
+	cacheDir := config.CacheDir
+	zipFile := fmt.Sprintf("%v%v%v", cacheDir, string(os.PathSeparator), "platform-tools.zip")
+	path := fmt.Sprintf("%v%vplatform-tools", workingDirectory, string(os.PathSeparator))
+	download := Downloads[SupportedVersion(config.ToolsVersion)][SupportedHostOS(config.HostOS)]
 
 	platformTools := &PlatformTools{
+		cacheDir:         cacheDir,
 		path:             path,
 		httpClient:       config.HttpClient,
-		downloadURI:      downloadURI,
-		sha256:           sha256,
+		downloadURI:      fmt.Sprintf(download.TemplateURL, DefaultBaseURI),
+		sha256:           download.CheckSum,
 		workingDirectory: workingDirectory,
 		zipFile:          zipFile,
 		logger:           config.Logger,
@@ -88,14 +70,25 @@ func New(config *Config) (*PlatformTools, error) {
 
 func (p *PlatformTools) initialize() error {
 	logger := p.logger.WithFields(logrus.Fields{
+		"cacheDir":    p.cacheDir,
 		"downloadURI": p.downloadURI,
 		"sha256":      p.sha256,
 		"zipFile":     p.zipFile,
 	})
 
-	logger.Debug("starting tools download")
-	err := p.download()
+	_, err := os.Stat(p.zipFile)
 	if err != nil {
+		logger.Debug("starting tools download")
+		err := p.download()
+		if err != nil {
+			return err
+		}
+	}
+
+	logger.Debug("starting tools verify")
+	err = p.verify()
+	if err != nil {
+		os.Remove(p.zipFile)
 		return err
 	}
 
@@ -104,13 +97,6 @@ func (p *PlatformTools) initialize() error {
 	if err != nil {
 		return err
 	}
-
-	// TODO: add back verify
-	//logger.Debug("starting tools verify")
-	//err = p.verify()
-	//if err != nil {
-	//	return err
-	//}
 
 	return nil
 }
@@ -130,7 +116,7 @@ func (p *PlatformTools) download() error {
 	}
 	defer out.Close()
 
-	p.logger.Debugf("downloading %v", p.downloadURI)
+	p.logger.Infof("downloading %v", p.downloadURI)
 	resp, err := p.httpClient.Get(p.downloadURI)
 	if err != nil {
 		return err
