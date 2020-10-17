@@ -34,8 +34,12 @@ func main() {
 	if *imagePtr == "" {
 		logger.Fatal("must specify factory image")
 	}
+	_, err := os.Stat(*imagePtr)
+	if err != nil {
+		logger.Fatalf("invalid factory image: %v", err)
+	}
 
-	err := execute(*namePtr, *imagePtr, runtime.GOOS, logger)
+	err = execute(*namePtr, *imagePtr, runtime.GOOS, logger)
 	if err != nil {
 		logger.Fatal(err)
 	}
