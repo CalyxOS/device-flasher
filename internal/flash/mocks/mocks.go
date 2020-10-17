@@ -6,7 +6,7 @@ package mocks
 
 import (
 	gomock "github.com/golang/mock/gomock"
-	devicediscovery "gitlab.com/calyxos/device-flasher/internal/devicediscovery"
+	device "gitlab.com/calyxos/device-flasher/internal/device"
 	platformtools "gitlab.com/calyxos/device-flasher/internal/platformtools"
 	fastboot "gitlab.com/calyxos/device-flasher/internal/platformtools/fastboot"
 	reflect "reflect"
@@ -50,7 +50,7 @@ func (mr *MockFactoryImageFlasherMockRecorder) FlashAll(arg0 interface{}) *gomoc
 }
 
 // Validate mocks base method
-func (m *MockFactoryImageFlasher) Validate(arg0 devicediscovery.Codename) error {
+func (m *MockFactoryImageFlasher) Validate(arg0 device.Codename) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Validate", arg0)
 	ret0, _ := ret[0].(error)

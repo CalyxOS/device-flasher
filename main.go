@@ -14,13 +14,13 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 )
 
 func main() {
-	toolsVersionPtr := flag.String("tools-version", string(platformtools.Version_30_0_4),
-		fmt.Sprintf("platform tools version. supported: %v", platformtools.SupportedVersions))
 	namePtr := flag.String("name", "CalyxOS", "os name")
 	imagePtr := flag.String("image", "", "factory image to flash")
 	debugPtr := flag.Bool("debug", false, "debug logging")
@@ -35,13 +35,13 @@ func main() {
 		logger.Fatal("must specify factory image")
 	}
 
-	err := execute(*namePtr, *imagePtr, *toolsVersionPtr, runtime.GOOS, logger)
+	err := execute(*namePtr, *imagePtr, runtime.GOOS, logger)
 	if err != nil {
 		logger.Fatal(err)
 	}
 }
 
-func execute(name, image, toolsVersion, hostOS string, logger *logrus.Logger) error {
+func execute(name, image, hostOS string, logger *logrus.Logger) error {
 	// setup udev if running linux
 	if hostOS == "linux" {
 		err := udev.Setup(logger, udev.DefaultUDevRules)
@@ -76,15 +76,21 @@ func execute(name, image, toolsVersion, hostOS string, logger *logrus.Logger) er
 	}
 	defer os.RemoveAll(tmpToolExtractDir)
 
+	// TODO: jasmine specific hack
+	toolsVersion := platformtools.Version_30_0_4
+	if strings.Contains(image, "jasmine") {
+		toolsVersion = platformtools.Version_29_0_6
+	}
+
 	logger.Debug("creating cache dir for downloaded platform tools zips")
-	toolZipCacheDir := fmt.Sprintf("%v%v%v%v", os.TempDir(), string(os.PathSeparator), "platform-tools-", toolsVersion)
+	toolZipCacheDir := filepath.Join(os.TempDir(), string(os.PathSeparator), "platform-tools", string(toolsVersion))
 	err = os.MkdirAll(toolZipCacheDir, os.ModePerm)
 	if err != nil {
 		return fmt.Errorf("failed to setup tools zip cache dir %v: %w", toolZipCacheDir, err)
 	}
 	platformTools, err := platformtools.New(&platformtools.Config{
 		CacheDir:             toolZipCacheDir,
-		HttpClient:           &http.Client{Timeout: time.Second * 60},
+		HttpClient:           &http.Client{Timeout: time.Minute * 5},
 		HostOS:               hostOS,
 		ToolsVersion:         toolsVersion,
 		DestinationDirectory: tmpToolExtractDir,

@@ -5,7 +5,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-	"gitlab.com/calyxos/device-flasher/internal/devicediscovery"
+	"gitlab.com/calyxos/device-flasher/internal/device"
 	"gitlab.com/calyxos/device-flasher/internal/factoryimage"
 	"gitlab.com/calyxos/device-flasher/internal/flash/mocks"
 	"gitlab.com/calyxos/device-flasher/internal/platformtools"
@@ -16,19 +16,19 @@ import (
 func TestFlash(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
-	testADBDevice := &devicediscovery.Device{
+	testADBDevice := &device.Device{
 		ID: "adbserial",
-		Codename: devicediscovery.Codename("crosshatch"),
-		DiscoveryTool: devicediscovery.ADB,
+		Codename: device.Codename("crosshatch"),
+		DiscoveryTool: device.ADB,
 	}
-	testDeviceFastboot := &devicediscovery.Device{
+	testDeviceFastboot := &device.Device{
 		ID: "fastbootserial",
-		Codename: devicediscovery.Codename("crosshatch"),
-		DiscoveryTool: devicediscovery.Fastboot,
+		Codename: device.Codename("crosshatch"),
+		DiscoveryTool: device.Fastboot,
 	}
 
 	tests := map[string]struct {
-		device  *devicediscovery.Device
+		device  *device.Device
 		prepare func(*mocks.MockFactoryImageFlasher, *mocks.MockPlatformToolsFlasher,
 			*mocks.MockADBFlasher, *mocks.MockFastbootFlasher)
 		expectedErr error

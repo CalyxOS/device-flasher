@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/mholt/archiver/v3"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/calyxos/device-flasher/internal/devicediscovery"
+	"gitlab.com/calyxos/device-flasher/internal/device"
 	"gitlab.com/calyxos/device-flasher/internal/platformtools"
 	"io/ioutil"
 	"os"
@@ -80,7 +80,7 @@ func (f *FactoryImage) FlashAll(platformToolsPath platformtools.PlatformToolsPat
 	return nil
 }
 
-func (f *FactoryImage) Validate(deviceCodename devicediscovery.Codename) error {
+func (f *FactoryImage) Validate(deviceCodename device.Codename) error {
 	f.logger.WithFields(logrus.Fields{
 		"deviceCodename": deviceCodename,
 	}).Info("running factory image validation")

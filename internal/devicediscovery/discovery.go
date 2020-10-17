@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/sirupsen/logrus"
+	"gitlab.com/calyxos/device-flasher/internal/device"
 )
 
 var (
@@ -33,7 +34,7 @@ func New(adbTool, fastbootTool DeviceDiscoverer, logger *logrus.Logger) *Discove
 	}
 }
 
-func (d *Discovery) DiscoverDevices() (map[string]*Device, error) {
+func (d *Discovery) DiscoverDevices() (map[string]*device.Device, error) {
 	d.logger.Debugf("discovering adb devices")
 	devices, err := d.getDevices(d.adbTool)
 	if err != nil {
@@ -50,15 +51,6 @@ func (d *Discovery) DiscoverDevices() (map[string]*Device, error) {
 		devices[k] = v
 	}
 
-	for _, v := range devices {
-		if rename, ok := CustomFlashHooks[v.Codename]; ok {
-			if rename.RenameCodename != "" {
-				d.logger.Debugf("custom renaming codename %v to %v", v.Codename, rename.RenameCodename)
-				v.Codename = rename.RenameCodename
-			}
-		}
-	}
-
 	if len(devices) == 0 {
 		return nil, ErrNoDevicesFound
 	}
@@ -66,9 +58,9 @@ func (d *Discovery) DiscoverDevices() (map[string]*Device, error) {
 	return devices, nil
 }
 
-func (d *Discovery) getDevices(tool DeviceDiscoverer) (map[string]*Device, error) {
+func (d *Discovery) getDevices(tool DeviceDiscoverer) (map[string]*device.Device, error) {
 	toolName := tool.Name()
-	devices := map[string]*Device{}
+	devices := map[string]*device.Device{}
 	deviceIds, err := tool.GetDeviceIds()
 	if err != nil {
 		return nil, fmt.Errorf("%v %w: %v", toolName, ErrGetDevices, err)
@@ -85,12 +77,7 @@ func (d *Discovery) getDevices(tool DeviceDiscoverer) (map[string]*Device, error
 			continue
 		}
 
-		devices[deviceId] = &Device{
-			ID:            deviceId,
-			Codename:      Codename(deviceCodename),
-			DiscoveryTool: ToolName(toolName),
-			FlashHooks:    CustomFlashHooks[Codename(deviceCodename)],
-		}
+		devices[deviceId] = device.New(deviceId, deviceCodename, toolName, d.logger)
 	}
 	return devices, nil
 }

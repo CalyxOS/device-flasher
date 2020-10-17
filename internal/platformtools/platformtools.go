@@ -11,6 +11,10 @@ import (
 	"os"
 )
 
+const (
+	DefaultBaseURI = "https://dl.google.com/android/repository"
+)
+
 type PlatformToolsPath string
 
 type Config struct {
@@ -18,7 +22,7 @@ type Config struct {
 	BaseURI              string
 	HttpClient           *http.Client
 	HostOS               string
-	ToolsVersion         string
+	ToolsVersion         SupportedVersion
 	DestinationDirectory string
 	Logger               *logrus.Logger
 }
@@ -40,7 +44,7 @@ func New(config *Config) (*PlatformTools, error) {
 	cacheDir := config.CacheDir
 	zipFile := fmt.Sprintf("%v%v%v", cacheDir, string(os.PathSeparator), "platform-tools.zip")
 	path := fmt.Sprintf("%v%vplatform-tools", workingDirectory, string(os.PathSeparator))
-	download := Downloads[SupportedVersion(config.ToolsVersion)][SupportedHostOS(config.HostOS)]
+	download := Downloads[config.ToolsVersion][SupportedHostOS(config.HostOS)]
 
 	platformTools := &PlatformTools{
 		cacheDir:         cacheDir,
