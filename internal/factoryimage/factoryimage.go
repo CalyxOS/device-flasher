@@ -115,8 +115,8 @@ func (f *FactoryImage) setup() error {
 
 func (f *FactoryImage) extract() error {
 	f.logger.WithFields(logrus.Fields{
-		"name":             f.name,
-		"imagePath":        f.imagePath,
+		"name":      f.name,
+		"imagePath": f.imagePath,
 	}).Info("extracting factory image")
 	err := archiver.Unarchive(f.imagePath, f.workingDirectory)
 	if err != nil {

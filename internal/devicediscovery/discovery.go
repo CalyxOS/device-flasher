@@ -21,16 +21,16 @@ type DeviceDiscoverer interface {
 }
 
 type Discovery struct {
-	adbTool           DeviceDiscoverer
-	fastbootTool      DeviceDiscoverer
-	logger 			  *logrus.Logger
+	adbTool      DeviceDiscoverer
+	fastbootTool DeviceDiscoverer
+	logger       *logrus.Logger
 }
 
 func New(adbTool, fastbootTool DeviceDiscoverer, logger *logrus.Logger) *Discovery {
 	return &Discovery{
-		adbTool: adbTool,
+		adbTool:      adbTool,
 		fastbootTool: fastbootTool,
-		logger: logger,
+		logger:       logger,
 	}
 }
 

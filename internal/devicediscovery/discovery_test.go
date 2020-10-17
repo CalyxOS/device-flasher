@@ -18,8 +18,8 @@ func TestDiscoverDevices(t *testing.T) {
 	testDeviceFastboot := &device.Device{ID: "serialfastboot", Codename: device.Codename("fastboot"), DiscoveryTool: device.Fastboot}
 
 	tests := map[string]struct {
-		device  *device.Device
-		prepare func(*mocks.MockDeviceDiscoverer, *mocks.MockDeviceDiscoverer)
+		device          *device.Device
+		prepare         func(*mocks.MockDeviceDiscoverer, *mocks.MockDeviceDiscoverer)
 		expectedErr     error
 		expectedDevices map[string]*device.Device
 	}{

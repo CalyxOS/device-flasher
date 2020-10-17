@@ -1,18 +1,22 @@
 package platformtools
 
 type SupportedHostOS string
+
 const (
 	OSDarwin  SupportedHostOS = "darwin"
 	OSLinux   SupportedHostOS = "linux"
 	OSWindows SupportedHostOS = "windows"
 )
+
 var SupportedHostOSes = []SupportedHostOS{OSDarwin, OSLinux, OSWindows}
 
 type SupportedVersion string
+
 const (
 	Version_29_0_6 SupportedVersion = "29.0.6"
 	Version_30_0_4 SupportedVersion = "30.0.4"
 )
+
 var SupportedVersions = []SupportedVersion{Version_29_0_6, Version_30_0_4}
 
 type VersionInfo struct {

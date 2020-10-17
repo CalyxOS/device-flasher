@@ -5,6 +5,7 @@ import (
 )
 
 type ToolName string
+
 const (
 	ADB      ToolName = "adb"
 	Fastboot ToolName = "fastboot"
@@ -21,10 +22,10 @@ type Device struct {
 
 func New(deviceId, codename, discoveryTool string, logger *logrus.Logger) *Device {
 	d := &Device{
-		ID: deviceId,
-		Codename: Codename(codename),
+		ID:            deviceId,
+		Codename:      Codename(codename),
 		DiscoveryTool: ToolName(discoveryTool),
-		CustomHooks: DeviceHooks[Codename(codename)],
+		CustomHooks:   DeviceHooks[Codename(codename)],
 	}
 	if hook, ok := DeviceHooks[d.Codename]; ok {
 		if hook.DiscoveryPost != nil {
@@ -33,10 +34,3 @@ func New(deviceId, codename, discoveryTool string, logger *logrus.Logger) *Devic
 	}
 	return d
 }
-
-
-
-
-
-
-

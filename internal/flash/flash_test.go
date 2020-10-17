@@ -17,13 +17,13 @@ func TestFlash(t *testing.T) {
 	ctrl := gomock.NewController(t)
 
 	testADBDevice := &device.Device{
-		ID: "adbserial",
-		Codename: device.Codename("crosshatch"),
+		ID:            "adbserial",
+		Codename:      device.Codename("crosshatch"),
 		DiscoveryTool: device.ADB,
 	}
 	testDeviceFastboot := &device.Device{
-		ID: "fastbootserial",
-		Codename: device.Codename("crosshatch"),
+		ID:            "fastbootserial",
+		Codename:      device.Codename("crosshatch"),
 		DiscoveryTool: device.Fastboot,
 	}
 

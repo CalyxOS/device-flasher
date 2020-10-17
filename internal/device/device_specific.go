@@ -17,11 +17,11 @@ var (
 			return nil
 		},
 		FlashingPreUnlock: additionalLockUnlockStep,
-		FlashingPreLock: additionalLockUnlockStep,
+		FlashingPreLock:   additionalLockUnlockStep,
 	}
 	walleyeHooks = &CustomHooks{
 		FlashingPreUnlock: additionalLockUnlockStep,
-		FlashingPreLock: additionalLockUnlockStep,
+		FlashingPreLock:   additionalLockUnlockStep,
 	}
 )
 
