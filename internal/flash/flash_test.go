@@ -11,6 +11,7 @@ import (
 	"gitlab.com/calyxos/device-flasher/internal/platformtools"
 	"gitlab.com/calyxos/device-flasher/internal/platformtools/fastboot"
 	"testing"
+	"time"
 )
 
 func TestFlash(t *testing.T) {
@@ -20,11 +21,13 @@ func TestFlash(t *testing.T) {
 		ID:            "adbserial",
 		Codename:      device.Codename("crosshatch"),
 		DiscoveryTool: device.ADB,
+		CustomHooks:   nil,
 	}
 	testDeviceFastboot := &device.Device{
 		ID:            "fastbootserial",
 		Codename:      device.Codename("crosshatch"),
 		DiscoveryTool: device.Fastboot,
+		CustomHooks:   nil,
 	}
 
 	tests := map[string]struct {
@@ -37,15 +40,19 @@ func TestFlash(t *testing.T) {
 			device: testADBDevice,
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
 				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
-				mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Return(nil)
-				mockADB.EXPECT().RebootIntoBootloader(testADBDevice.ID).Return(nil)
-				mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil)
-				mockFastboot.EXPECT().SetBootloaderLockStatus(testADBDevice.ID, fastboot.Unlocked).Return(nil)
-				mockPlatformTools.EXPECT().Path().Return(platformtools.PlatformToolsPath("/tmp"))
-				mockFactoryImage.EXPECT().FlashAll(testADBDevice, platformtools.PlatformToolsPath("/tmp")).Return(nil)
-				mockFastboot.EXPECT().SetBootloaderLockStatus(testADBDevice.ID, fastboot.Locked).Return(nil)
-				mockFastboot.EXPECT().Reboot(testADBDevice.ID).Return(nil)
-				mockADB.EXPECT().KillServer()
+				gomock.InOrder(
+					mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Times(1).Return(nil),
+					mockADB.EXPECT().RebootIntoBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil).Times(1),
+					mockPlatformTools.EXPECT().Path().AnyTimes().Return(platformtools.PlatformToolsPath("/tmp")),
+					mockFastboot.EXPECT().UnlockBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Unlocked, nil).Times(1),
+					mockPlatformTools.EXPECT().Path().AnyTimes().Return(platformtools.PlatformToolsPath("/tmp")),
+					mockFactoryImage.EXPECT().FlashAll(testADBDevice, platformtools.PlatformToolsPath("/tmp")).Times(1).Return(nil),
+					mockFastboot.EXPECT().LockBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil).Times(1),
+					mockFastboot.EXPECT().Reboot(testADBDevice.ID).Times(1).Return(nil),
+				)
 			},
 			expectedErr: nil,
 		},
@@ -53,14 +60,18 @@ func TestFlash(t *testing.T) {
 			device: testDeviceFastboot,
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
 				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
-				mockFactoryImage.EXPECT().Validate(testDeviceFastboot.Codename).Return(nil)
-				mockFastboot.EXPECT().GetBootloaderLockStatus(testDeviceFastboot.ID).Return(fastboot.Locked, nil)
-				mockFastboot.EXPECT().SetBootloaderLockStatus(testDeviceFastboot.ID, fastboot.Unlocked).Return(nil)
-				mockPlatformTools.EXPECT().Path().Return(platformtools.PlatformToolsPath("/tmp"))
-				mockFactoryImage.EXPECT().FlashAll(testDeviceFastboot, platformtools.PlatformToolsPath("/tmp")).Return(nil)
-				mockFastboot.EXPECT().SetBootloaderLockStatus(testDeviceFastboot.ID, fastboot.Locked).Return(nil)
-				mockFastboot.EXPECT().Reboot(testDeviceFastboot.ID).Return(nil)
-				mockADB.EXPECT().KillServer()
+				gomock.InOrder(
+					mockFactoryImage.EXPECT().Validate(testDeviceFastboot.Codename).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testDeviceFastboot.ID).Return(fastboot.Locked, nil).Times(1),
+					mockPlatformTools.EXPECT().Path().AnyTimes().Return(platformtools.PlatformToolsPath("/tmp")),
+					mockFastboot.EXPECT().UnlockBootloader(testDeviceFastboot.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testDeviceFastboot.ID).Return(fastboot.Unlocked, nil).Times(1),
+					mockPlatformTools.EXPECT().Path().AnyTimes().Return(platformtools.PlatformToolsPath("/tmp")),
+					mockFactoryImage.EXPECT().FlashAll(testDeviceFastboot, platformtools.PlatformToolsPath("/tmp")).Times(1).Return(nil),
+					mockFastboot.EXPECT().LockBootloader(testDeviceFastboot.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testDeviceFastboot.ID).Return(fastboot.Locked, nil).Times(1),
+					mockFastboot.EXPECT().Reboot(testDeviceFastboot.ID).Times(1).Return(nil),
+				)
 			},
 			expectedErr: nil,
 		},
@@ -68,14 +79,16 @@ func TestFlash(t *testing.T) {
 			device: testADBDevice,
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
 				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
-				mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Return(nil)
-				mockADB.EXPECT().RebootIntoBootloader(testADBDevice.ID).Return(nil)
-				mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Unlocked, nil)
-				mockPlatformTools.EXPECT().Path().Return(platformtools.PlatformToolsPath("/tmp"))
-				mockFactoryImage.EXPECT().FlashAll(testADBDevice, platformtools.PlatformToolsPath("/tmp")).Return(nil)
-				mockFastboot.EXPECT().SetBootloaderLockStatus(testADBDevice.ID, fastboot.Locked).Return(nil)
-				mockFastboot.EXPECT().Reboot(testADBDevice.ID).Return(nil)
-				mockADB.EXPECT().KillServer()
+				gomock.InOrder(
+					mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Times(1).Return(nil),
+					mockADB.EXPECT().RebootIntoBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Unlocked, nil).Times(1),
+					mockPlatformTools.EXPECT().Path().AnyTimes().Return(platformtools.PlatformToolsPath("/tmp")),
+					mockFactoryImage.EXPECT().FlashAll(testADBDevice, platformtools.PlatformToolsPath("/tmp")).Times(1).Return(nil),
+					mockFastboot.EXPECT().LockBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil).Times(1),
+					mockFastboot.EXPECT().Reboot(testADBDevice.ID).Times(1).Return(nil),
+				)
 			},
 			expectedErr: nil,
 		},
@@ -84,7 +97,6 @@ func TestFlash(t *testing.T) {
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
 				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
 				mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Return(factoryimage.ErrorValidation)
-				mockADB.EXPECT().KillServer()
 			},
 			expectedErr: factoryimage.ErrorValidation,
 		},
@@ -92,15 +104,19 @@ func TestFlash(t *testing.T) {
 			device: testADBDevice,
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
 				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
-				mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Return(nil)
-				mockADB.EXPECT().RebootIntoBootloader(testADBDevice.ID).Return(errors.New("not fatal"))
-				mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil)
-				mockFastboot.EXPECT().SetBootloaderLockStatus(testADBDevice.ID, fastboot.Unlocked).Return(nil)
-				mockPlatformTools.EXPECT().Path().Return(platformtools.PlatformToolsPath("/tmp"))
-				mockFactoryImage.EXPECT().FlashAll(testADBDevice, platformtools.PlatformToolsPath("/tmp")).Return(nil)
-				mockFastboot.EXPECT().SetBootloaderLockStatus(testADBDevice.ID, fastboot.Locked).Return(nil)
-				mockFastboot.EXPECT().Reboot(testADBDevice.ID).Return(nil)
-				mockADB.EXPECT().KillServer()
+				gomock.InOrder(
+					mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Times(1).Return(nil),
+					mockADB.EXPECT().RebootIntoBootloader(testADBDevice.ID).Times(1).Return(errors.New("not fatal")),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil).Times(1),
+					mockPlatformTools.EXPECT().Path().AnyTimes().Return(platformtools.PlatformToolsPath("/tmp")),
+					mockFastboot.EXPECT().UnlockBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Unlocked, nil).Times(1),
+					mockPlatformTools.EXPECT().Path().AnyTimes().Return(platformtools.PlatformToolsPath("/tmp")),
+					mockFactoryImage.EXPECT().FlashAll(testADBDevice, platformtools.PlatformToolsPath("/tmp")).Times(1).Return(nil),
+					mockFastboot.EXPECT().LockBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil).Times(1),
+					mockFastboot.EXPECT().Reboot(testADBDevice.ID).Times(1).Return(nil),
+				)
 			},
 			expectedErr: nil,
 		},
@@ -108,67 +124,163 @@ func TestFlash(t *testing.T) {
 			device: testADBDevice,
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
 				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
-				mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Return(nil)
-				mockADB.EXPECT().RebootIntoBootloader(testADBDevice.ID).Return(nil)
-				mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Unknown, fastboot.ErrorCommandFailure)
-				mockADB.EXPECT().KillServer()
+				gomock.InOrder(
+					mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Times(1).Return(nil),
+					mockADB.EXPECT().RebootIntoBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Unknown, fastboot.ErrorCommandFailure),
+				)
 			},
 			expectedErr: fastboot.ErrorCommandFailure,
 		},
-		"set bootloader status unlock failure": {
+		"unlock bootloader failure": {
 			device: testADBDevice,
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
 				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
-				mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Return(nil)
-				mockADB.EXPECT().RebootIntoBootloader(testADBDevice.ID).Return(nil)
-				mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil)
-				mockFastboot.EXPECT().SetBootloaderLockStatus(testADBDevice.ID, fastboot.Unlocked).Return(fastboot.ErrorUnlockBootloader)
-				mockADB.EXPECT().KillServer()
+				gomock.InOrder(
+					mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Times(1).Return(nil),
+					mockADB.EXPECT().RebootIntoBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil).Times(1),
+					mockFastboot.EXPECT().UnlockBootloader(testADBDevice.ID).Times(1).Return(fastboot.ErrorUnlockBootloader),
+				)
 			},
 			expectedErr: fastboot.ErrorUnlockBootloader,
+		},
+		"unlock bootloader tests for devices that immediately return - retry passes": {
+			device: testADBDevice,
+			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
+				gomock.InOrder(
+					mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Times(1).Return(nil),
+					mockADB.EXPECT().RebootIntoBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil).Times(1),
+					mockFastboot.EXPECT().UnlockBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil).Times(1),
+					mockFastboot.EXPECT().UnlockBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Unlocked, nil).Times(1),
+					mockPlatformTools.EXPECT().Path().AnyTimes().Return(platformtools.PlatformToolsPath("/tmp")),
+					mockFactoryImage.EXPECT().FlashAll(testADBDevice, platformtools.PlatformToolsPath("/tmp")).Times(1).Return(nil),
+					mockFastboot.EXPECT().LockBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil).Times(1),
+					mockFastboot.EXPECT().Reboot(testADBDevice.ID).Times(1).Return(nil),
+				)
+			},
+			expectedErr: nil,
+		},
+		"unlock bootloader tests for devices that immediately return - max retry fails": {
+			device: testADBDevice,
+			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
+				gomock.InOrder(
+					mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Times(1).Return(nil),
+					mockADB.EXPECT().RebootIntoBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil).Times(1),
+					mockFastboot.EXPECT().UnlockBootloader(testADBDevice.ID).Times(1).Return(nil).Times(1),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil).Times(1),
+					mockFastboot.EXPECT().UnlockBootloader(testADBDevice.ID).Times(1).Return(nil).Times(1),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil).Times(1),
+					mockFastboot.EXPECT().UnlockBootloader(testADBDevice.ID).Times(1).Return(nil).Times(1),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil).Times(1),
+				)
+			},
+			expectedErr: ErrMaxLockUnlockRetries,
 		},
 		"flash all error": {
 			device: testADBDevice,
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
 				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
-				mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Return(nil)
-				mockADB.EXPECT().RebootIntoBootloader(testADBDevice.ID).Return(nil)
-				mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil)
-				mockFastboot.EXPECT().SetBootloaderLockStatus(testADBDevice.ID, fastboot.Unlocked).Return(nil)
-				mockPlatformTools.EXPECT().Path().Return(platformtools.PlatformToolsPath("/tmp"))
-				mockFactoryImage.EXPECT().FlashAll(testADBDevice, platformtools.PlatformToolsPath("/tmp")).Return(factoryimage.ErrorFailedToFlash)
-				mockADB.EXPECT().KillServer()
+				gomock.InOrder(
+					mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Times(1).Return(nil),
+					mockADB.EXPECT().RebootIntoBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil).Times(1),
+					mockPlatformTools.EXPECT().Path().AnyTimes().Return(platformtools.PlatformToolsPath("/tmp")),
+					mockFastboot.EXPECT().UnlockBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Unlocked, nil).Times(1),
+					mockPlatformTools.EXPECT().Path().AnyTimes().Return(platformtools.PlatformToolsPath("/tmp")),
+					mockFactoryImage.EXPECT().FlashAll(testADBDevice, platformtools.PlatformToolsPath("/tmp")).Times(1).Return(factoryimage.ErrorFailedToFlash),
+				)
 			},
 			expectedErr: factoryimage.ErrorFailedToFlash,
 		},
-		"set bootloader status lock failure": {
+		"lock bootloader failure": {
 			device: testADBDevice,
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
 				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
-				mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Return(nil)
-				mockADB.EXPECT().RebootIntoBootloader(testADBDevice.ID).Return(nil)
-				mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil)
-				mockFastboot.EXPECT().SetBootloaderLockStatus(testADBDevice.ID, fastboot.Unlocked).Return(nil)
-				mockPlatformTools.EXPECT().Path().Return(platformtools.PlatformToolsPath("/tmp"))
-				mockFactoryImage.EXPECT().FlashAll(testADBDevice, platformtools.PlatformToolsPath("/tmp")).Return(nil)
-				mockFastboot.EXPECT().SetBootloaderLockStatus(testADBDevice.ID, fastboot.Locked).Return(fastboot.ErrorLockBootloader)
-				mockADB.EXPECT().KillServer()
+				gomock.InOrder(
+					mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Times(1).Return(nil),
+					mockADB.EXPECT().RebootIntoBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil).Times(1),
+					mockPlatformTools.EXPECT().Path().AnyTimes().Return(platformtools.PlatformToolsPath("/tmp")),
+					mockFastboot.EXPECT().UnlockBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Unlocked, nil).Times(1),
+					mockPlatformTools.EXPECT().Path().AnyTimes().Return(platformtools.PlatformToolsPath("/tmp")),
+					mockFactoryImage.EXPECT().FlashAll(testADBDevice, platformtools.PlatformToolsPath("/tmp")).Times(1).Return(nil),
+					mockFastboot.EXPECT().LockBootloader(testADBDevice.ID).Times(1).Return(fastboot.ErrorLockBootloader),
+				)
 			},
 			expectedErr: fastboot.ErrorLockBootloader,
+		},
+		"lock bootloader tests for devices that immediately return - retry passes": {
+			device: testADBDevice,
+			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
+				gomock.InOrder(
+					mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Times(1).Return(nil),
+					mockADB.EXPECT().RebootIntoBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil).Times(1),
+					mockPlatformTools.EXPECT().Path().AnyTimes().Return(platformtools.PlatformToolsPath("/tmp")),
+					mockFastboot.EXPECT().UnlockBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Unlocked, nil).Times(1),
+					mockPlatformTools.EXPECT().Path().AnyTimes().Return(platformtools.PlatformToolsPath("/tmp")),
+					mockFactoryImage.EXPECT().FlashAll(testADBDevice, platformtools.PlatformToolsPath("/tmp")).Times(1).Return(nil),
+					mockFastboot.EXPECT().LockBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Unlocked, nil).Times(1),
+					mockFastboot.EXPECT().LockBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil).Times(1),
+					mockFastboot.EXPECT().Reboot(testADBDevice.ID).Times(1).Return(nil),
+				)
+			},
+			expectedErr: nil,
+		},
+		"lock bootloader tests for devices that immediately return - max retries fail": {
+			device: testADBDevice,
+			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
+				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
+				gomock.InOrder(
+					mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Times(1).Return(nil),
+					mockADB.EXPECT().RebootIntoBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil).Times(1),
+					mockPlatformTools.EXPECT().Path().AnyTimes().Return(platformtools.PlatformToolsPath("/tmp")),
+					mockFastboot.EXPECT().UnlockBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Unlocked, nil).Times(1),
+					mockPlatformTools.EXPECT().Path().AnyTimes().Return(platformtools.PlatformToolsPath("/tmp")),
+					mockFactoryImage.EXPECT().FlashAll(testADBDevice, platformtools.PlatformToolsPath("/tmp")).Times(1).Return(nil),
+					mockFastboot.EXPECT().LockBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Unlocked, nil).Times(1),
+					mockFastboot.EXPECT().LockBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Unlocked, nil).Times(1),
+					mockFastboot.EXPECT().LockBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Unlocked, nil).Times(1),
+				)
+			},
+			expectedErr: ErrMaxLockUnlockRetries,
 		},
 		"reboot error is not fatal": {
 			device: testADBDevice,
 			prepare: func(mockFactoryImage *mocks.MockFactoryImageFlasher, mockPlatformTools *mocks.MockPlatformToolsFlasher,
 				mockADB *mocks.MockADBFlasher, mockFastboot *mocks.MockFastbootFlasher) {
-				mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Return(nil)
-				mockADB.EXPECT().RebootIntoBootloader(testADBDevice.ID).Return(nil)
-				mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil)
-				mockFastboot.EXPECT().SetBootloaderLockStatus(testADBDevice.ID, fastboot.Unlocked).Return(nil)
-				mockPlatformTools.EXPECT().Path().Return(platformtools.PlatformToolsPath("/tmp"))
-				mockFactoryImage.EXPECT().FlashAll(testADBDevice, platformtools.PlatformToolsPath("/tmp")).Return(nil)
-				mockFastboot.EXPECT().SetBootloaderLockStatus(testADBDevice.ID, fastboot.Locked).Return(nil)
-				mockFastboot.EXPECT().Reboot(testADBDevice.ID).Return(fastboot.ErrorRebootFailure)
-				mockADB.EXPECT().KillServer()
+				gomock.InOrder(
+					mockFactoryImage.EXPECT().Validate(testADBDevice.Codename).Times(1).Return(nil),
+					mockADB.EXPECT().RebootIntoBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil).Times(1),
+					mockPlatformTools.EXPECT().Path().AnyTimes().Return(platformtools.PlatformToolsPath("/tmp")),
+					mockFastboot.EXPECT().UnlockBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Unlocked, nil).Times(1),
+					mockPlatformTools.EXPECT().Path().AnyTimes().Return(platformtools.PlatformToolsPath("/tmp")),
+					mockFactoryImage.EXPECT().FlashAll(testADBDevice, platformtools.PlatformToolsPath("/tmp")).Times(1).Return(nil),
+					mockFastboot.EXPECT().LockBootloader(testADBDevice.ID).Times(1).Return(nil),
+					mockFastboot.EXPECT().GetBootloaderLockStatus(testADBDevice.ID).Return(fastboot.Locked, nil).Times(1),
+					mockFastboot.EXPECT().Reboot(testADBDevice.ID).Times(1).Return(fastboot.ErrorRebootFailure),
+				)
 			},
 			expectedErr: nil,
 		},
@@ -181,24 +293,27 @@ func TestFlash(t *testing.T) {
 			mockADB := mocks.NewMockADBFlasher(ctrl)
 			mockFastboot := mocks.NewMockFastbootFlasher(ctrl)
 
-			if tc.prepare != nil {
-				tc.prepare(mockFactoryImage, mockPlatformTools, mockADB, mockFastboot)
-			}
+			tc.prepare(mockFactoryImage, mockPlatformTools, mockADB, mockFastboot)
 
+			logger := logrus.StandardLogger()
+			logger.SetLevel(logrus.DebugLevel)
 			flash := New(&Config{
-				HostOS:        "TestOS",
-				FactoryImage:  mockFactoryImage,
-				PlatformTools: mockPlatformTools,
-				ADB:           mockADB,
-				Fastboot:      mockFastboot,
-				Logger:        logrus.StandardLogger(),
+				HostOS:                    "TestOS",
+				FactoryImage:              mockFactoryImage,
+				PlatformTools:             mockPlatformTools,
+				ADB:                       mockADB,
+				Fastboot:                  mockFastboot,
+				Logger:                    logger,
+				LockUnlockValidationPause: time.Millisecond,
+				LockUnlockRetries:         DefaultLockUnlockRetries,
+				LockUnlockRetryInterval:   time.Millisecond,
 			})
 
 			err := flash.Flash(tc.device)
 			if tc.expectedErr == nil {
 				assert.Nil(t, err)
 			} else {
-				assert.True(t, errors.Is(err, tc.expectedErr), true)
+				assert.True(t, errors.Is(err, tc.expectedErr))
 			}
 		})
 	}

@@ -8,7 +8,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
 const (
@@ -66,33 +65,6 @@ func (t *Tool) GetDeviceCodename(deviceId string) (string, error) {
 	return t.getVar("product", deviceId)
 }
 
-func (t *Tool) SetBootloaderLockStatus(deviceId string, wantedStatus FastbootLockStatus) error {
-	bootloaderCommand := t.lockBootloader
-	if wantedStatus == Unlocked {
-		bootloaderCommand = t.unlockBootloader
-	}
-	err := bootloaderCommand(deviceId)
-	if err != nil {
-		return err
-	}
-
-	time.Sleep(5 * time.Second)
-
-	lockStatus, err := t.GetBootloaderLockStatus(deviceId)
-	if err != nil {
-		return err
-	}
-
-	if lockStatus != wantedStatus {
-		if wantedStatus == Unlocked {
-			return fmt.Errorf("%w: %v", ErrorUnlockBootloader, deviceId)
-		}
-		return fmt.Errorf("%w: %v", ErrorLockBootloader, deviceId)
-	}
-
-	return nil
-}
-
 func (t *Tool) GetBootloaderLockStatus(deviceId string) (FastbootLockStatus, error) {
 	unlocked, err := t.getVar("unlocked", deviceId)
 	if err != nil {
@@ -105,6 +77,22 @@ func (t *Tool) GetBootloaderLockStatus(deviceId string) (FastbootLockStatus, err
 		return Locked, nil
 	}
 	return Unknown, fmt.Errorf("%w: %v", ErrorUnknownLockStatus, unlocked)
+}
+
+func (t *Tool) LockBootloader(deviceId string) error {
+	_, err := t.command([]string{"-s", deviceId, "flashing", "lock"})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (t *Tool) UnlockBootloader(deviceId string) error {
+	_, err := t.command([]string{"-s", deviceId, "flashing", "unlock"})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (t *Tool) Reboot(deviceId string) error {
@@ -126,22 +114,6 @@ func (t *Tool) command(args []string) ([]byte, error) {
 		return nil, fmt.Errorf("%w: %v", ErrorCommandFailure, err)
 	}
 	return data, nil
-}
-
-func (t *Tool) lockBootloader(deviceId string) error {
-	_, err := t.command([]string{"-s", deviceId, "flashing", "lock"})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (t *Tool) unlockBootloader(deviceId string) error {
-	_, err := t.command([]string{"-s", deviceId, "flashing", "unlock"})
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (t *Tool) getVar(prop, deviceId string) (string, error) {

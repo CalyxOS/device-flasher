@@ -189,6 +189,20 @@ func (mr *MockFastbootFlasherMockRecorder) GetBootloaderLockStatus(arg0 interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBootloaderLockStatus", reflect.TypeOf((*MockFastbootFlasher)(nil).GetBootloaderLockStatus), arg0)
 }
 
+// LockBootloader mocks base method
+func (m *MockFastbootFlasher) LockBootloader(arg0 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "LockBootloader", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// LockBootloader indicates an expected call of LockBootloader
+func (mr *MockFastbootFlasherMockRecorder) LockBootloader(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "LockBootloader", reflect.TypeOf((*MockFastbootFlasher)(nil).LockBootloader), arg0)
+}
+
 // Reboot mocks base method
 func (m *MockFastbootFlasher) Reboot(arg0 string) error {
 	m.ctrl.T.Helper()
@@ -203,16 +217,16 @@ func (mr *MockFastbootFlasherMockRecorder) Reboot(arg0 interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Reboot", reflect.TypeOf((*MockFastbootFlasher)(nil).Reboot), arg0)
 }
 
-// SetBootloaderLockStatus mocks base method
-func (m *MockFastbootFlasher) SetBootloaderLockStatus(arg0 string, arg1 fastboot.FastbootLockStatus) error {
+// UnlockBootloader mocks base method
+func (m *MockFastbootFlasher) UnlockBootloader(arg0 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SetBootloaderLockStatus", arg0, arg1)
+	ret := m.ctrl.Call(m, "UnlockBootloader", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// SetBootloaderLockStatus indicates an expected call of SetBootloaderLockStatus
-func (mr *MockFastbootFlasherMockRecorder) SetBootloaderLockStatus(arg0, arg1 interface{}) *gomock.Call {
+// UnlockBootloader indicates an expected call of UnlockBootloader
+func (mr *MockFastbootFlasherMockRecorder) UnlockBootloader(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetBootloaderLockStatus", reflect.TypeOf((*MockFastbootFlasher)(nil).SetBootloaderLockStatus), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UnlockBootloader", reflect.TypeOf((*MockFastbootFlasher)(nil).UnlockBootloader), arg0)
 }
