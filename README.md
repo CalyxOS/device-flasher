@@ -10,11 +10,11 @@ A cross platform tool that simplifies the process of flashing factory images ont
 ### Flashing
 * Connect your phone over USB
 * Open a terminal and run device flasher for your platform:
-  * Windows: 
+  * Windows:
     ```
     .\device-flasher.exe -image <factory image zip>
     ```
-  * Linux: 
+  * Linux:
     ```
     ./device-flasher.linux -image <factory image zip>
     ```
