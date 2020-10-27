@@ -9,13 +9,13 @@ COMMON_ARGS := GOARCH=amd64 CGO_ENABLED=0
 all: clean build
 
 $(PROGRAM_NAME).linux:
-	$(COMMON_ARGS) GOOS=linux go build $(TAGS) $(LDFLAGS) -o $@
+	$(COMMON_ARGS) GOOS=linux go build -mod=vendor $(TAGS) $(LDFLAGS) -o $@
 
 $(PROGRAM_NAME).exe:
-	$(COMMON_ARGS) GOOS=windows go build $(TAGS) $(LDFLAGS) -o $@
+	$(COMMON_ARGS) GOOS=windows go build -mod=vendor $(TAGS) $(LDFLAGS) -o $@
 
 $(PROGRAM_NAME).darwin:
-	$(COMMON_ARGS) GOOS=darwin go build $(TAGS) $(LDFLAGS) -o $@
+	$(COMMON_ARGS) GOOS=darwin go build -mod=vendor $(TAGS) $(LDFLAGS) -o $@
 
 .PHONY: build
 build: $(PROGRAMS)
