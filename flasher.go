@@ -333,7 +333,7 @@ func flashDevices(devices map[string]string) {
 			_ = platformToolCommand.Run()
 			fmt.Println("Unlocking " + device + " " + serialNumber + " bootloader...")
 			warnln("5. Please use the volume and power keys on the device to unlock the bootloader")
-			if device == "jasmine" || device == "walleye" {
+			if device == "jasmine_sprout" || device == "walleye" {
 				fmt.Println()
 				warnln("  5a. Once " + device + " " + serialNumber + " boots, disconnect its cable and power it off")
 				warnln("  5b. Then, press volume down + power to boot it into fastboot mode, and connect the cable again.")
@@ -367,7 +367,7 @@ func flashDevices(devices map[string]string) {
 			}
 			fmt.Println("Locking " + device + " " + serialNumber + " bootloader...")
 			warnln("6. Please use the volume and power keys on the device to lock the bootloader")
-			if device == "jasmine" || device == "walleye" {
+			if device == "jasmine_sprout" || device == "walleye" {
 				fmt.Println()
 				warnln("  6a. Once " + device + " " + serialNumber + " boots, disconnect its cable and power it off")
 				warnln("  6b. Then, press volume down + power to boot it into fastboot mode, and connect the cable again.")
