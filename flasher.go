@@ -281,6 +281,7 @@ func flashDevices(devices map[string]string) {
 		wg.Add(1)
 		go func(serialNumber, device string) {
 			defer wg.Done()
+			_ = os.Setenv("ANDROID_SERIAL", serialNumber)
 			platformToolCommand := *adb
 			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "reboot", "bootloader")
 			_ = platformToolCommand.Run()
@@ -324,6 +325,7 @@ func flashDevices(devices map[string]string) {
 			}())
 			flashAll.Dir = deviceFactoryFolderMap[device]
 			flashAll.Stderr = os.Stderr
+			flashAll.Env = append(flashAll.Environ(), "ANDROID_SERIAL=" + serialNumber)
 			err := flashAll.Run()
 			if err != nil {
 				errorln("Failed to flash "+device+" "+serialNumber, false)
