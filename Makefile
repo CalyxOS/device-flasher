@@ -6,7 +6,7 @@ EXTENSIONS := linux exe darwin
 NAMES := $(PROGRAM_NAME) $(PROGRAM_DEBUG_NAME) $(PARALLEL_NAME) $(PARALLEL_DEBUG_NAME)
 PROGRAMS := $(foreach PROG,$(NAMES),$(foreach EXT,$(EXTENSIONS),$(PROG).$(EXT)))
 VERSION := $(shell git describe --always --tags --dirty='-dirty')
-LDFLAGS := -ldflags "-X main.version=$(VERSION)"
+LDFLAGS := -ldflags "-X main.version=$(VERSION) -buildid=" -trimpath
 COMMON_ARGS := GOARCH=amd64 CGO_ENABLED=0
 
 $(PROGRAM_NAME).%: TAGS := -tags release
