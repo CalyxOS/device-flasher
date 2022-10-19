@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c2be6368_14909cd2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-10-19T21:39:49Z",
+      "side": 1,
+      "message": "Identical to AOSPAlliance/device-flasher 1.0.4 tag",
+      "revId": "c50d8242e92741d429248be4ec8d3f8c3a131624",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
