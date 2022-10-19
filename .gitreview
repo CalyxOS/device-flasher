@@ -1,5 +1,5 @@
 [gerrit]
 host=review.calyxos.org
 port=29418
-project=AOSPAlliance/device-flasher
-defaultbranch=stable/v1
+project=CalyxOS/device-flasher
+defaultbranch=main
