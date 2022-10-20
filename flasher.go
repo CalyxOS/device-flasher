@@ -424,6 +424,10 @@ func flashDevices(devices map[string]string) {
 				_ = platformToolCommand.Start()
 				time.Sleep(30 * time.Second)
 				if i >= 2 {
+					if device == "FP4" {
+						errorln("Unable to determine if bootloader was locked", false)
+						continue
+					}
 					errorln("Failed to lock "+device+" "+serialNumber+" bootloader", false)
 					return
 				}
