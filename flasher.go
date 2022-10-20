@@ -43,7 +43,6 @@ var cwd = filepath.Dir(executable)
 var adb *exec.Cmd
 var fastboot *exec.Cmd
 
-var platformToolsVersion = "33.0.3"
 var platformToolsZip string
 
 var deviceFactoryFolderMap map[string]string
@@ -52,6 +51,7 @@ var deviceFactoryFolderMap map[string]string
 var version string
 
 const OS = runtime.GOOS
+const PLATFORM_TOOLS_VERSION = "33.0.3"
 
 const (
 	UDEV_RULES = "# Google\nSUBSYSTEM==\"usb\", ATTR{idVendor}==\"18d1\", GROUP=\"sudo\"\n# Xiaomi\nSUBSYSTEM==\"usb\", ATTR{idVendor}==\"2717\", GROUP=\"sudo\"\n"
@@ -164,9 +164,6 @@ func getFactoryFolders() map[string]string {
 	for _, file := range files {
 		file := file.Name()
 		if strings.Contains(file, "factory") && strings.HasSuffix(file, ".zip") {
-			if strings.HasPrefix(file, "jasmine") {
-				platformToolsVersion = "29.0.6"
-			}
 			extracted, err := extractZip(path.Base(file), cwd)
 			if err != nil {
 				errorln("Cannot continue without a factory image. Exiting...", false)
@@ -185,22 +182,16 @@ func getFactoryFolders() map[string]string {
 
 func getPlatformTools() error {
 	plaformToolsUrlMap := map[[2]string]string{
-		[2]string{"darwin", "29.0.6"}:  "https://dl.google.com/android/repository/platform-tools_r29.0.6-darwin.zip",
-		[2]string{"linux", "29.0.6"}:   "https://dl.google.com/android/repository/platform-tools_r29.0.6-linux.zip",
-		[2]string{"windows", "29.0.6"}: "https://dl.google.com/android/repository/platform-tools_r29.0.6-windows.zip",
 		[2]string{"darwin", "33.0.3"}:  "https://dl.google.com/android/repository/platform-tools_r33.0.3-darwin.zip",
 		[2]string{"linux", "33.0.3"}:   "https://dl.google.com/android/repository/platform-tools_r33.0.3-linux.zip",
 		[2]string{"windows", "33.0.3"}: "https://dl.google.com/android/repository/platform-tools_r33.0.3-windows.zip",
 	}
 	platformToolsChecksumMap := map[[2]string]string{
-		[2]string{"darwin", "29.0.6"}:  "7555e8e24958cae4cfd197135950359b9fe8373d4862a03677f089d215119a3a",
-		[2]string{"linux", "29.0.6"}:   "cc9e9d0224d1a917bad71fe12d209dfffe9ce43395e048ab2f07dcfc21101d44",
-		[2]string{"windows", "29.0.6"}: "247210e3c12453545f8e1f76e55de3559c03f2d785487b2e4ac00fe9698a039c",
 		[2]string{"darwin", "33.0.3"}:  "84acbbd2b2ccef159ae3e6f83137e44ad18388ff3cc66bb057c87d761744e595",
 		[2]string{"linux", "33.0.3"}:   "ab885c20f1a9cb528eb145b9208f53540efa3d26258ac3ce4363570a0846f8f7",
 		[2]string{"windows", "33.0.3"}: "1e59afd40a74c5c0eab0a9fad3f0faf8a674267106e0b19921be9f67081808c2",
 	}
-	platformToolsOsVersion := [2]string{OS, platformToolsVersion}
+	platformToolsOsVersion := [2]string{OS, PLATFORM_TOOLS_VERSION}
 	_, err := os.Stat(path.Base(plaformToolsUrlMap[platformToolsOsVersion]))
 	if err != nil {
 		err = downloadFile(plaformToolsUrlMap[platformToolsOsVersion])
