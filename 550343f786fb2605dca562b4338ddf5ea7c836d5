@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "87a6d0dc_06f939a7",
+        "filename": "flasher.go",
+        "patchSetId": 1
+      },
+      "lineNbr": 321,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-10-20T01:26:21Z",
+      "side": 1,
+      "message": "Somehow this keeps failing, err says \"exit status 1\"\n\n`fastboot oem device-info` right after works\n`fastboot -s $serial oem device-info` works too\n\n:(",
+      "revId": "550343f786fb2605dca562b4338ddf5ea7c836d5",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e0ba91e4_6befbc6b",
+        "filename": "flasher.go",
+        "patchSetId": 1
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-10-20T01:26:21Z",
+      "side": 1,
+      "message": "This is thus always due to the error and thus it tries to unlock even when already unlocked.",
+      "revId": "550343f786fb2605dca562b4338ddf5ea7c836d5",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d485b956_528eb267",
+        "filename": "flasher.go",
+        "patchSetId": 1
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-10-20T01:26:21Z",
+      "side": 1,
+      "message": "If we just run this without the check, we get:\n\n```\nFAILED (remote: \u0027       Device already : unlocked!\u0027)\nfastboot: error: Command failed\n```",
+      "revId": "550343f786fb2605dca562b4338ddf5ea7c836d5",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
