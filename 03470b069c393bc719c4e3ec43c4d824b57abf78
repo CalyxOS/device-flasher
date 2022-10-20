@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ab0c07a8_007a80cf",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-10-20T01:40:12Z",
+      "side": 1,
+      "message": "In theory it doesn\u0027t hurt keeping it in but we can\u0027t test it anymore.\n\nWe still have the old flasher on the website if anyone needs that.",
+      "revId": "03470b069c393bc719c4e3ec43c4d824b57abf78",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
