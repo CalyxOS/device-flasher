@@ -318,7 +318,7 @@ func getUnlockAbility(device string) string {
 
 func getCriticalUnlocked(device string) string {
 	platformToolCommand := *fastboot
-	platformToolCommand.Args = append(fastboot.Args, "-s", device, "oem device-info")
+	platformToolCommand.Args = append(fastboot.Args, "-s", device, "oem", "device-info")
 	out, err := platformToolCommand.CombinedOutput()
 	if err != nil {
 		return ""
@@ -326,7 +326,7 @@ func getCriticalUnlocked(device string) string {
 	lines := strings.Split(string(out), "\n")
 	for _, line := range lines {
 		if strings.Contains(line, "Device critical unlocked:") {
-			return strings.Trim(strings.Split(line, " ")[1], "\r")
+			return strings.Trim(strings.Split(line, " ")[4], "\r")
 		}
 	}
 	return ""
