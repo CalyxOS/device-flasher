@@ -302,7 +302,7 @@ func getVar(prop string, device string) string {
 
 func getUnlockAbility(device string) string {
 	platformToolCommand := *fastboot
-	platformToolCommand.Args = append(fastboot.Args, "-s", device, "flashing get_unlock_ability")
+	platformToolCommand.Args = append(fastboot.Args, "-s", device, "flashing", "get_unlock_ability")
 	out, err := platformToolCommand.CombinedOutput()
 	if err != nil {
 		return ""
@@ -310,6 +310,22 @@ func getUnlockAbility(device string) string {
 	lines := strings.Split(string(out), "\n")
 	for _, line := range lines {
 		if strings.Contains(line, "get_unlock_ability") {
+			return strings.Trim(strings.Split(line, " ")[1], "\r")
+		}
+	}
+	return ""
+}
+
+func getCriticalUnlocked(device string) string {
+	platformToolCommand := *fastboot
+	platformToolCommand.Args = append(fastboot.Args, "-s", device, "oem device-info")
+	out, err := platformToolCommand.CombinedOutput()
+	if err != nil {
+		return ""
+	}
+	lines := strings.Split(string(out), "\n")
+	for _, line := range lines {
+		if strings.Contains(line, "Device critical unlocked:") {
 			return strings.Trim(strings.Split(line, " ")[1], "\r")
 		}
 	}
@@ -346,6 +362,21 @@ func flashDevices(devices map[string]string) {
 				if i >= 2 {
 					errorln("Failed to unlock "+device+" "+serialNumber+" bootloader", false)
 					return
+				}
+			}
+			if device == "FP4" {
+				for i := 0; getCriticalUnlocked(serialNumber) != "true"; i++ {
+					fmt.Println("Unlocking (critical) " + device + " " + serialNumber + " bootloader...")
+					warnln("5.1. Please use the volume and power keys on the device to unlock the bootloader (critical)")
+					fmt.Println()
+					platformToolCommand = *fastboot
+					platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "unlock_critical")
+					_ = platformToolCommand.Start()
+					time.Sleep(30 * time.Second)
+					if i >= 2 {
+						errorln("Failed to unlock (critical) "+device+" "+serialNumber+" bootloader", false)
+						return
+					}
 				}
 			}
 			fmt.Println("Flashing " + device + " " + serialNumber + " bootloader...")
