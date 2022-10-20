@@ -18,6 +18,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "530640ec_b9331a7a",
+        "filename": "flasher.go",
+        "patchSetId": 1
+      },
+      "lineNbr": 321,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-10-20T16:44:39Z",
+      "side": 1,
+      "message": "\"oem device-info\" no go\n\n\"oem\", \"device-info\" works",
+      "parentUuid": "87a6d0dc_06f939a7",
+      "revId": "550343f786fb2605dca562b4338ddf5ea7c836d5",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e0ba91e4_6befbc6b",
@@ -35,6 +53,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c8c3e741_30547c0f",
+        "filename": "flasher.go",
+        "patchSetId": 1
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-10-20T16:44:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e0ba91e4_6befbc6b",
+      "revId": "550343f786fb2605dca562b4338ddf5ea7c836d5",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d485b956_528eb267",
@@ -48,6 +84,24 @@
       "writtenOn": "2022-10-20T01:26:21Z",
       "side": 1,
       "message": "If we just run this without the check, we get:\n\n```\nFAILED (remote: \u0027       Device already : unlocked!\u0027)\nfastboot: error: Command failed\n```",
+      "revId": "550343f786fb2605dca562b4338ddf5ea7c836d5",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "658f8e75_3a1c77ca",
+        "filename": "flasher.go",
+        "patchSetId": 1
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-10-20T16:44:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d485b956_528eb267",
       "revId": "550343f786fb2605dca562b4338ddf5ea7c836d5",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
