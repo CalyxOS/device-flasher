@@ -320,6 +320,12 @@ func flashDevices(devices map[string]string) {
 			_ = platformToolCommand.Run()
 			fmt.Println("Unlocking " + device + " " + serialNumber + " bootloader...")
 			warnln("5. Please use the volume and power keys on the device to unlock the bootloader")
+			if device == "FP4" {
+				fmt.Println()
+				warnln("  5a. Once " + device + " " + serialNumber + " boots, disconnect its cable and power it off")
+				warnln("  5b. Then, press volume down + power to boot it into fastboot mode, and connect the cable again.")
+				fmt.Println("The installation will resume automatically")
+			}
 			for i := 0; getVar("unlocked", serialNumber) != "yes"; i++ {
 				platformToolCommand = *fastboot
 				platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "unlock")
@@ -376,6 +382,10 @@ func flashDevices(devices map[string]string) {
 				_ = platformToolCommand.Start()
 				time.Sleep(30 * time.Second)
 				if i >= 2 {
+					if device == "FP4" {
+						errorln("Unable to determine if bootloader was locked", false)
+						continue
+					}
 					errorln("Failed to lock "+device+" "+serialNumber+" bootloader", false)
 					return
 				}
