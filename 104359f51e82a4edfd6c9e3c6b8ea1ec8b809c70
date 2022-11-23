@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e2b37c09_7eb123ca",
+        "filename": "flasher.go",
+        "patchSetId": 2
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-11-23T12:13:15Z",
+      "side": 1,
+      "message": "We\u0027re setting it here which is where it matters.\n\nEverywhere else we call both `fastboot` and `adb` with `-s $SERIAL`",
+      "revId": "104359f51e82a4edfd6c9e3c6b8ea1ec8b809c70",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
