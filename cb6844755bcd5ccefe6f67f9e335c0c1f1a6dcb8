@@ -33,6 +33,24 @@
       "message": "Will also need website updates.",
       "revId": "cb6844755bcd5ccefe6f67f9e335c0c1f1a6dcb8",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5819b268_99638d09",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-11-23T12:26:27Z",
+      "side": 1,
+      "message": "Pixels are same for fastboot\n\nFP4 mostly same",
+      "parentUuid": "73bad416_8dfba838",
+      "revId": "cb6844755bcd5ccefe6f67f9e335c0c1f1a6dcb8",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
