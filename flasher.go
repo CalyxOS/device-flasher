@@ -130,8 +130,8 @@ func main() {
 	}
 	warnln("1. Connect to a wifi network and ensure that no SIM cards are installed")
 	warnln("2. Enable Developer Options on device (Settings -> About Phone -> tap \"Build number\" 7 times)")
-	warnln("3. Enable USB debugging on device (Settings -> System -> Advanced -> Developer Options) and allow the computer to debug (hit \"OK\" on the popup when USB is connected)")
-	warnln("4. Enable OEM Unlocking (in the same Developer Options menu)")
+	warnln("3. Enable OEM Unlocking (Settings -> System -> Advanced -> Developer Options)")
+	warnln("4. Disconnect your device, fastboot mode...")
 	fmt.Println()
 	fmt.Print(Warn("Press ENTER to continue"))
 	_, _ = fmt.Scanln(&input)
