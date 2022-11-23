@@ -39,6 +39,30 @@
       },
       "revId": "ecbea72ac96b3b1688d24aab27a76a4874391c69",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6ea11dfa_b2d269eb",
+        "filename": "flasher.go",
+        "patchSetId": 1
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2022-11-23T15:07:36Z",
+      "side": 1,
+      "message": "Where though?\nThis is right after locking (line 423), which is required anyways.\n\nAnd it\u0027s before the \"failed to lock bootloader\" text, which was the goal here.",
+      "parentUuid": "318a3de9_8ee3f3d8",
+      "range": {
+        "startLine": 427,
+        "startChar": 5,
+        "endLine": 430,
+        "endChar": 6
+      },
+      "revId": "ecbea72ac96b3b1688d24aab27a76a4874391c69",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
