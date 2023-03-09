@@ -1,3 +1,4 @@
+//go:build parallel
 // +build parallel
 
 package main

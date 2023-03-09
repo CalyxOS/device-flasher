@@ -355,7 +355,7 @@ func flashDevices(devices map[string]string) {
 			}())
 			flashAll.Dir = deviceFactoryFolderMap[device]
 			flashAll.Stderr = os.Stderr
-			flashAll.Env = append(flashAll.Environ(), "ANDROID_SERIAL=" + serialNumber)
+			flashAll.Env = append(flashAll.Environ(), "ANDROID_SERIAL="+serialNumber)
 			err := flashAll.Run()
 			if err != nil {
 				errorln("Failed to flash "+device+" "+serialNumber, false)
@@ -369,7 +369,7 @@ func flashDevices(devices map[string]string) {
 					errorln("Not locking bootloader of "+device+" "+serialNumber, false)
 					errorln("fastboot flashing get_unlock_ability returned 0", false)
 					errorln("Please visit https://calyxos.org/FP4 for more information.", true)
-					return;
+					return
 				}
 				platformToolCommand = *fastboot
 				platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "lock")
