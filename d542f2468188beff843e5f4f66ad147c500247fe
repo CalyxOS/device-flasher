@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2e908426_a1b8dcce",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-03-09T23:19:32Z",
+      "side": 1,
+      "message": "Website Change: https://review.calyxos.org/c/CalyxOS/calyxos.org/+/15947 device-flasher: No more adb ",
+      "revId": "d542f2468188beff843e5f4f66ad147c500247fe",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
