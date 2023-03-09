@@ -33,6 +33,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"flag"
 )
 
 var input string
@@ -46,6 +47,9 @@ var fastboot *exec.Cmd
 var platformToolsZip string
 
 var deviceFactoryFolderMap map[string]string
+
+// Set via flag
+var parallel bool
 
 // Set via LDFLAGS, check Makefile
 var version string
@@ -87,6 +91,11 @@ func warnln(warning interface{}) {
 	fmt.Println(Warn(warning))
 }
 
+func init() {
+	flag.BoolVar(&parallel, "parallel", false, "Flash multiple devices at the same time.")
+	flag.Parse()
+}
+
 func main() {
 	_ = os.Remove("error.log")
 	fmt.Println("Android Factory Image Flasher version " + version)
@@ -121,7 +130,7 @@ func main() {
 	devices := getDevices()
 	if len(devices) == 0 {
 		errorln(errors.New("No devices to be flashed. Exiting..."), true)
-	} else if !PARALLEL && len(devices) > 1 {
+	} else if !parallel && len(devices) > 1 {
 		errorln(errors.New("More than one device detected. Exiting..."), true)
 	}
 	fmt.Println()
