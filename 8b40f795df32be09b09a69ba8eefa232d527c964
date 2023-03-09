@@ -16,6 +16,23 @@
       "message": "Hold due to website changes required.",
       "revId": "8b40f795df32be09b09a69ba8eefa232d527c964",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a419ed16_d41acc35",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-03-09T20:09:20Z",
+      "side": 1,
+      "message": " https://review.calyxos.org/c/CalyxOS/calyxos.org/+/15943 device-flasher: No more sudo \n\nWebsite change, will be merged when this is live.",
+      "revId": "8b40f795df32be09b09a69ba8eefa232d527c964",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
