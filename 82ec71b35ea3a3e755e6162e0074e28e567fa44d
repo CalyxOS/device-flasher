@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9b71cdf3_e5e13331",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-03-09T23:22:17Z",
+      "side": 1,
+      "message": "We could ask for a bootloader update but that won\u0027t help users on existing builds who want to install so let\u0027s just roll with this",
+      "revId": "82ec71b35ea3a3e755e6162e0074e28e567fa44d",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
