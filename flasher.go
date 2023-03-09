@@ -223,6 +223,9 @@ func getDevices() map[string]string {
 					device = getProp("ro.product.device", serialNumber)
 				} else if platformToolCommand.Path == fastboot.Path {
 					device = getVar("product", serialNumber)
+					if device == "sdm845" {
+						device = "axolotl"
+					}
 				}
 				fmt.Print("Detected " + device + " " + serialNumber)
 				if _, ok := deviceFactoryFolderMap[device]; ok {
