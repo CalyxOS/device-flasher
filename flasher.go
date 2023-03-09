@@ -386,7 +386,6 @@ func flashDevices(devices map[string]string) {
 			platformToolCommand = *fastboot
 			platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "reboot")
 			_ = platformToolCommand.Start()
-			warnln("7. Disable OEM unlocking from Developer Options after setting up your device")
 		}(serialNumber, device)
 	}
 	wg.Wait()
