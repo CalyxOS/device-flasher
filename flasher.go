@@ -343,7 +343,7 @@ func flashDevices(devices map[string]string) {
 					_ = platformToolCommand.Start()
 					time.Sleep(30 * time.Second)
 					if i >= 2 {
-						errorln("Failed to unlock (critical) "+device+" "+serialNumber+" bootloader", false)
+						errorln("Failed to unlock (critical) "+device+" "+serialNumber+" bootloader", true)
 						return
 					}
 				}
