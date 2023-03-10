@@ -34,6 +34,23 @@
       "parentUuid": "9b71cdf3_e5e13331",
       "revId": "82ec71b35ea3a3e755e6162e0074e28e567fa44d",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "85ce30d6_6708a1d0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2023-03-10T13:39:58Z",
+      "side": 1,
+      "message": "I think we aren\u0027t getting any more sdm845 devices so this should be fine",
+      "revId": "82ec71b35ea3a3e755e6162e0074e28e567fa44d",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
