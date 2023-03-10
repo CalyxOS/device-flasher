@@ -51,6 +51,24 @@
       "message": "I think we aren\u0027t getting any more sdm845 devices so this should be fine",
       "revId": "82ec71b35ea3a3e755e6162e0074e28e567fa44d",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2bcd7e93_008e8072",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-03-10T17:44:28Z",
+      "side": 1,
+      "message": "Please, the fact that we can even think about asking for a bootloader update for something like this is a huge step.",
+      "parentUuid": "0ee18e69_023329c8",
+      "revId": "82ec71b35ea3a3e755e6162e0074e28e567fa44d",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
