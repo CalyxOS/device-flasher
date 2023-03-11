@@ -338,7 +338,7 @@ func flashDevices(devices map[string]string) {
 				platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "unlock")
 				_ = platformToolCommand.Start()
 				time.Sleep(30 * time.Second)
-				if i >= 2 {
+				if i >= 5 {
 					errorln("Failed to unlock "+device+" "+serialNumber+" bootloader", true)
 					return
 				}
