@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3d73b16b_9893f956",
+        "filename": "flasher.go",
+        "patchSetId": 6
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2023-03-13T16:31:35Z",
+      "side": 1,
+      "message": "This is pretty tricky in my experience, holding volume down + power just boots the device normally if you don\u0027t plug the cable in time. A more consistent way is to just hold volume down (without power button) and plug the cable, it will always go to bootloader.",
+      "range": {
+        "startLine": 329,
+        "startChar": 18,
+        "endLine": 329,
+        "endChar": 109
+      },
+      "revId": "2cd4b1e93e8e6ad8997b5de83d623c9a048db834",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
