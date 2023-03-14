@@ -329,7 +329,7 @@ func flashDevices(devices map[string]string) {
 				if device == "axolotl" {
 					warnln("  5b. Then, press volume up + power to boot it into fastboot mode, and connect the cable again.")
 				} else {
-					warnln("  5b. Then, press volume down + power to boot it into fastboot mode, and connect the cable again.")
+					warnln("  5b. Then, hold volume down and connect the cable again to boot it into fastboot mode.")
 				}
 				fmt.Println("The installation will resume automatically")
 			}
