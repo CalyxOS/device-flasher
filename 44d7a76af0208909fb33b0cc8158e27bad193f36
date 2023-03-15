@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8c2f593a_17edd648",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-03-15T11:29:55Z",
+      "side": 1,
+      "message": "Also need to update https://review.calyxos.org/c/CalyxOS/device-flasher/+/14611",
+      "revId": "44d7a76af0208909fb33b0cc8158e27bad193f36",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5c593740_4f96d741",
+        "filename": "flasher.go",
+        "patchSetId": 1
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-03-15T11:29:55Z",
+      "side": 1,
+      "message": "Should we change this too?",
+      "revId": "44d7a76af0208909fb33b0cc8158e27bad193f36",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
