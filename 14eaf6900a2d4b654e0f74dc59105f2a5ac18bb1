@@ -87,6 +87,24 @@
       "parentUuid": "de75336e_b55a26da",
       "revId": "14eaf6900a2d4b654e0f74dc59105f2a5ac18bb1",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "397cc818_d9db7e9e",
+        "filename": "flasher.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-03-16T15:11:21Z",
+      "side": 1,
+      "message": "\u003e Does it work the same for pixels?\n\nYes! I\u0027ve been using it for years, on all Pixels.\n\nAlso,\n\nhttps://source.android.com/docs/setup/build/running#booting-into-fastboot-mode",
+      "parentUuid": "ae5be6b7_3288c270",
+      "revId": "14eaf6900a2d4b654e0f74dc59105f2a5ac18bb1",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
