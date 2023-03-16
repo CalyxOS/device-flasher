@@ -18,6 +18,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "2ce90198_63ee1f7d",
+        "filename": "flasher.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-03-16T14:18:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "11598173_d5ca2552",
+      "revId": "14eaf6900a2d4b654e0f74dc59105f2a5ac18bb1",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "030ea2ca_d647e0e5",
@@ -31,6 +49,24 @@
       "writtenOn": "2023-03-15T11:30:28Z",
       "side": 1,
       "message": "match language with https://review.calyxos.org/c/CalyxOS/device-flasher/+/16074/1/flasher.go",
+      "revId": "14eaf6900a2d4b654e0f74dc59105f2a5ac18bb1",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "de75336e_b55a26da",
+        "filename": "flasher.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-03-16T14:18:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "030ea2ca_d647e0e5",
       "revId": "14eaf6900a2d4b654e0f74dc59105f2a5ac18bb1",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
