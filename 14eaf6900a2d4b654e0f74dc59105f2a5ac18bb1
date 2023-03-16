@@ -105,6 +105,24 @@
       "parentUuid": "ae5be6b7_3288c270",
       "revId": "14eaf6900a2d4b654e0f74dc59105f2a5ac18bb1",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7677163b_91131f7a",
+        "filename": "flasher.go",
+        "patchSetId": 4
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-03-16T15:12:01Z",
+      "side": 1,
+      "message": "Ehh just realised it says hold power too but it still works. Plugging in USB basically functions as power.",
+      "parentUuid": "397cc818_d9db7e9e",
+      "revId": "14eaf6900a2d4b654e0f74dc59105f2a5ac18bb1",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
