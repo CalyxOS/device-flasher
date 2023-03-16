@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2ec34850_660870c7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-03-16T14:21:03Z",
+      "side": 1,
+      "message": "This also fixes gitlab CI (which runs go vet)\n\nI tried a few different ways to make this work but gave up and decided to just do this instead.",
+      "revId": "832a5f8dedf5674f5235994a44100f35e6b1f9f1",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
