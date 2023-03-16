@@ -33,6 +33,24 @@
       "message": "Should we change this too?",
       "revId": "44d7a76af0208909fb33b0cc8158e27bad193f36",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5b524566_fbe3183d",
+        "filename": "flasher.go",
+        "patchSetId": 1
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2023-03-16T13:48:47Z",
+      "side": 1,
+      "message": "No, it works as expected",
+      "parentUuid": "5c593740_4f96d741",
+      "revId": "44d7a76af0208909fb33b0cc8158e27bad193f36",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
