@@ -1,5 +1,5 @@
 // Copyright 2020 CIS Maxwell, LLC. All rights reserved.
-// Copyright 2020 The Calyx Institute
+// Copyright 2020-2026 The Calyx Institute
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ var parallel bool
 var version string
 
 const OS = runtime.GOOS
-const PLATFORM_TOOLS_VERSION = "33.0.3"
+const PLATFORM_TOOLS_VERSION = "37.0.1"
 
 var (
 	Error = Red
@@ -173,14 +173,14 @@ func getFactoryFolders() map[string]string {
 
 func getPlatformTools() error {
 	plaformToolsUrlMap := map[[2]string]string{
-		[2]string{"darwin", "33.0.3"}:  "https://dl.google.com/android/repository/platform-tools_r33.0.3-darwin.zip",
-		[2]string{"linux", "33.0.3"}:   "https://dl.google.com/android/repository/platform-tools_r33.0.3-linux.zip",
-		[2]string{"windows", "33.0.3"}: "https://dl.google.com/android/repository/platform-tools_r33.0.3-windows.zip",
+		[2]string{"darwin", "37.0.1"}:  "https://dl.google.com/android/repository/platform-tools_r37.0.1-darwin.zip",
+		[2]string{"linux", "37.0.1"}:   "https://dl.google.com/android/repository/platform-tools_r37.0.1-linux.zip",
+		[2]string{"windows", "37.0.1"}: "https://web.archive.org/web/20260731070637/https://dl.google.com/android/repository/platform-tools-latest-windows.zip", // All >= 35.0.1 URLs are broken
 	}
 	platformToolsChecksumMap := map[[2]string]string{
-		[2]string{"darwin", "33.0.3"}:  "84acbbd2b2ccef159ae3e6f83137e44ad18388ff3cc66bb057c87d761744e595",
-		[2]string{"linux", "33.0.3"}:   "ab885c20f1a9cb528eb145b9208f53540efa3d26258ac3ce4363570a0846f8f7",
-		[2]string{"windows", "33.0.3"}: "1e59afd40a74c5c0eab0a9fad3f0faf8a674267106e0b19921be9f67081808c2",
+		[2]string{"darwin", "37.0.1"}:  "ee39ad5967e95c2a07f04dbcbde96b1a0c916ba376096db5d2f498b7727a5d1d",
+		[2]string{"linux", "37.0.1"}:   "d230f13842f60f782a8645f9c813f8f845bf36089ea7289f28c48f17979313f1",
+		[2]string{"windows", "37.0.1"}: "45f4d63113e895ebde0c90f194099a4676b6ac653bd28d54314a9e022bbc1a99",
 	}
 	platformToolsOsVersion := [2]string{OS, PLATFORM_TOOLS_VERSION}
 	_, err := os.Stat(path.Base(plaformToolsUrlMap[platformToolsOsVersion]))
