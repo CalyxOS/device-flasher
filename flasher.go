@@ -55,7 +55,7 @@ var parallel bool
 var version string
 
 const OS = runtime.GOOS
-const PLATFORM_TOOLS_VERSION = "33.0.3"
+const PLATFORM_TOOLS_VERSION = "35.0.2"
 
 var (
 	Error = Red
@@ -172,14 +172,14 @@ func getFactoryFolders() map[string]string {
 
 func getPlatformTools() error {
 	plaformToolsUrlMap := map[[2]string]string{
-		[2]string{"darwin", "33.0.3"}:  "https://dl.google.com/android/repository/platform-tools_r33.0.3-darwin.zip",
-		[2]string{"linux", "33.0.3"}:   "https://dl.google.com/android/repository/platform-tools_r33.0.3-linux.zip",
-		[2]string{"windows", "33.0.3"}: "https://dl.google.com/android/repository/platform-tools_r33.0.3-windows.zip",
+		[2]string{"darwin", "35.0.2"}:  "https://dl.google.com/android/repository/platform-tools_r35.0.2-darwin.zip",
+		[2]string{"linux", "35.0.2"}:   "https://dl.google.com/android/repository/platform-tools_r35.0.2-linux.zip",
+		[2]string{"windows", "35.0.2"}: "https://dl.google.com/android/repository/platform-tools_r35.0.0-windows.zip", // 35.0.2 URL broken
 	}
 	platformToolsChecksumMap := map[[2]string]string{
-		[2]string{"darwin", "33.0.3"}:  "84acbbd2b2ccef159ae3e6f83137e44ad18388ff3cc66bb057c87d761744e595",
-		[2]string{"linux", "33.0.3"}:   "ab885c20f1a9cb528eb145b9208f53540efa3d26258ac3ce4363570a0846f8f7",
-		[2]string{"windows", "33.0.3"}: "1e59afd40a74c5c0eab0a9fad3f0faf8a674267106e0b19921be9f67081808c2",
+		[2]string{"darwin", "35.0.2"}:  "1820078db90bf21628d257ff052528af1c61bb48f754b3555648f5652fa35d78",
+		[2]string{"linux", "35.0.2"}:   "acfdcccb123a8718c46c46c059b2f621140194e5ec1ac9d81715be3d6ab6cd0a",
+		[2]string{"windows", "35.0.2"}: "7ab78a8f8b305ae4d0de647d99c43599744de61a0838d3a47bda0cdffefee87e",
 	}
 	platformToolsOsVersion := [2]string{OS, PLATFORM_TOOLS_VERSION}
 	_, err := os.Stat(path.Base(plaformToolsUrlMap[platformToolsOsVersion]))
