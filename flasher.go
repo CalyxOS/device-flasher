@@ -327,7 +327,7 @@ func flashDevices(devices map[string]string) {
 				fmt.Println()
 				warnln("  5a. Once " + device + " " + serialNumber + " boots, disconnect its cable and power it off")
 				if device == "axolotl" {
-					warnln("  5b. Then, press volume up + power to boot it into fastboot mode, and connect the cable again.")
+					warnln("  5b. Then, hold volume up and connect the cable again to boot it into fastboot mode.")
 				} else {
 					warnln("  5b. Then, hold volume down and connect the cable again to boot it into fastboot mode.")
 				}
