@@ -51,7 +51,7 @@ var deviceFactoryFolderMap map[string]string
 var version string
 
 const OS = runtime.GOOS
-const PLATFORM_TOOLS_VERSION = "33.0.3"
+const PLATFORM_TOOLS_VERSION = "34.0.5"
 
 var (
 	Error = Red
@@ -161,14 +161,14 @@ func getFactoryFolders() map[string]string {
 
 func getPlatformTools() error {
 	plaformToolsUrlMap := map[[2]string]string{
-		[2]string{"darwin", "33.0.3"}:  "https://dl.google.com/android/repository/platform-tools_r33.0.3-darwin.zip",
-		[2]string{"linux", "33.0.3"}:   "https://dl.google.com/android/repository/platform-tools_r33.0.3-linux.zip",
-		[2]string{"windows", "33.0.3"}: "https://dl.google.com/android/repository/platform-tools_r33.0.3-windows.zip",
+		[2]string{"darwin", "34.0.5"}:  "https://dl.google.com/android/repository/platform-tools_r34.0.5-darwin.zip",
+		[2]string{"linux", "34.0.5"}:   "https://dl.google.com/android/repository/platform-tools_r34.0.5-linux.zip",
+		[2]string{"windows", "34.0.5"}: "https://dl.google.com/android/repository/platform-tools_r34.0.5-windows.zip",
 	}
 	platformToolsChecksumMap := map[[2]string]string{
-		[2]string{"darwin", "33.0.3"}:  "84acbbd2b2ccef159ae3e6f83137e44ad18388ff3cc66bb057c87d761744e595",
-		[2]string{"linux", "33.0.3"}:   "ab885c20f1a9cb528eb145b9208f53540efa3d26258ac3ce4363570a0846f8f7",
-		[2]string{"windows", "33.0.3"}: "1e59afd40a74c5c0eab0a9fad3f0faf8a674267106e0b19921be9f67081808c2",
+		[2]string{"darwin", "34.0.5"}:  "b2c9757744a9d01fcc616b893ac6236233caf1bdf2ef384d73371ab68bfc4a43",
+		[2]string{"linux", "34.0.5"}:   "362f8f6218af0f4c61e5aaafb8e255a426c7a0ee00127dfab7371775081d3124",
+		[2]string{"windows", "34.0.5"}: "3f8320152704377de150418a3c4c9d07d16d80a6c0d0d8f7289c22c499e33571",
 	}
 	platformToolsOsVersion := [2]string{OS, PLATFORM_TOOLS_VERSION}
 	_, err := os.Stat(path.Base(plaformToolsUrlMap[platformToolsOsVersion]))
