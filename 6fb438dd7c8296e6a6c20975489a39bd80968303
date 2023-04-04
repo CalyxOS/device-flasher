@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7ab607d8_27ae1d1e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2023-04-04T20:39:28Z",
+      "side": 1,
+      "message": "Wait for 34.0.2 or another future release, 34.0.0/1 are widely reported to have issues with fastboot.",
+      "revId": "6fb438dd7c8296e6a6c20975489a39bd80968303",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
