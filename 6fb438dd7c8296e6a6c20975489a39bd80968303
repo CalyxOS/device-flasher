@@ -34,6 +34,24 @@
       "parentUuid": "7ab607d8_27ae1d1e",
       "revId": "6fb438dd7c8296e6a6c20975489a39bd80968303",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "76d8e9df_1b45cc15",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-05-17T14:27:44Z",
+      "side": 1,
+      "message": "No changelog yet, but I do see a tag for 34.0.3\n\n* https://android.googlesource.com/platform/system/core/+log/refs/tags/platform-tools-34.0.3/fastboot",
+      "parentUuid": "648b4a10_5c69ac15",
+      "revId": "6fb438dd7c8296e6a6c20975489a39bd80968303",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
