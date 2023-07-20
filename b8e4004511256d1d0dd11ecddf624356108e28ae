@@ -33,6 +33,24 @@
       "message": "This will also need website changes.\n\nTODO: Test again with latest platform-tools to see if apple silicon laptop situation got better, but that\u0027s unlikely",
       "revId": "b8e4004511256d1d0dd11ecddf624356108e28ae",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d768afdc_e3c8a055",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-07-20T18:01:51Z",
+      "side": 1,
+      "message": "Works on Apple Silicon in conjunction with platform tools 34.0.4",
+      "parentUuid": "53b13324_8ae4c4e2",
+      "revId": "b8e4004511256d1d0dd11ecddf624356108e28ae",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
