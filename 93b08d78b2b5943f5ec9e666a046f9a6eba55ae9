@@ -16,6 +16,23 @@
       "message": "Android Factory Image Flasher version 1.0.7-2-g1195c11\n\nWorks fine on linux at least, flashed oriole.",
       "revId": "93b08d78b2b5943f5ec9e666a046f9a6eba55ae9",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fa489c78_406e2b1b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-07-20T17:59:54Z",
+      "side": 1,
+      "message": "Works on Windows 11 too.",
+      "revId": "93b08d78b2b5943f5ec9e666a046f9a6eba55ae9",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
