@@ -333,7 +333,7 @@ func flashDevices(devices map[string]string) {
 				}
 				fmt.Println("The installation will resume automatically")
 			}
-			for i := 0; getVar("unlocked", serialNumber) != "yes"; i++ {
+			for i := 0; getVar("securestate", serialNumber) != "flashing_unlocked"; i++ {
 				platformToolCommand = *fastboot
 				platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "unlock")
 				_ = platformToolCommand.Start()
