@@ -279,6 +279,26 @@ func getUnlockAbility(device string) string {
 	return ""
 }
 
+// Moto:
+// $ fastboot getvar securestate
+// flashing_locked
+// Rest:
+// $ fastboot getvar unlocked
+// no
+func isntLocked(serialNumber string, device string) bool {
+	if device == "devon" || device == "hawao" || device == "rhode" {
+		return getVar("securestate", serialNumber) != "flashing_locked"
+	}
+	return getVar("unlocked", serialNumber) != "no"
+}
+
+func isntUnlocked(serialNumber string, device string) bool {
+	if device == "devon" || device == "hawao" || device == "rhode" {
+		return getVar("securestate", serialNumber) != "flashing_unlocked"
+	}
+	return getVar("unlocked", serialNumber) != "yes"
+}
+
 // $ fastboot oem device-info
 // (bootloader) Verity mode: false
 // (bootloader) Device unlocked: true
@@ -333,7 +353,7 @@ func flashDevices(devices map[string]string) {
 				}
 				fmt.Println("The installation will resume automatically")
 			}
-			for i := 0; getVar("unlocked", serialNumber) != "yes"; i++ {
+			for i := 0; isntUnlocked(serialNumber, device); i++ {
 				platformToolCommand = *fastboot
 				platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "unlock")
 				_ = platformToolCommand.Start()
@@ -377,7 +397,7 @@ func flashDevices(devices map[string]string) {
 			}
 			fmt.Println("Locking " + device + " " + serialNumber + " bootloader...")
 			warnln("6. Please use the volume and power keys on the device to lock the bootloader")
-			for i := 0; getVar("unlocked", serialNumber) != "no"; i++ {
+			for i := 0; isntLocked(serialNumber, device); i++ {
 				if device == "FP4" && getUnlockAbility(serialNumber) != "1" {
 					errorln("Not locking bootloader of "+device+" "+serialNumber, false)
 					errorln("fastboot flashing get_unlock_ability returned 0", false)
