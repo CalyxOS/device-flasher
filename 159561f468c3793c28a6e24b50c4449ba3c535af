@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "21499522_3455da9d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2023-11-17T17:46:36Z",
+      "side": 1,
+      "message": "The 2 functions could be combined but not a blocker",
+      "revId": "159561f468c3793c28a6e24b50c4449ba3c535af",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
