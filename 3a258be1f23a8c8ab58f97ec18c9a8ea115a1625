@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5bb8a04f_3e6b508d",
+        "filename": "flasher.go",
+        "patchSetId": 6
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2023-11-20T14:22:51Z",
+      "side": 1,
+      "message": "isNot?",
+      "range": {
+        "startLine": 291,
+        "startChar": 5,
+        "endLine": 291,
+        "endChar": 9
+      },
+      "revId": "3a258be1f23a8c8ab58f97ec18c9a8ea115a1625",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
