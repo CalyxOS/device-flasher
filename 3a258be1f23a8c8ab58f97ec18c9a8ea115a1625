@@ -22,6 +22,30 @@
       },
       "revId": "3a258be1f23a8c8ab58f97ec18c9a8ea115a1625",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7a355dc0_2d8a4245",
+        "filename": "flasher.go",
+        "patchSetId": 6
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2023-11-20T14:29:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5bb8a04f_3e6b508d",
+      "range": {
+        "startLine": 291,
+        "startChar": 5,
+        "endLine": 291,
+        "endChar": 9
+      },
+      "revId": "3a258be1f23a8c8ab58f97ec18c9a8ea115a1625",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
