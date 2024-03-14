@@ -392,6 +392,7 @@ func flashDevices(devices map[string]string) {
 			flashAll.Dir = deviceFactoryFolderMap[device]
 			flashAll.Stderr = os.Stderr
 			flashAll.Env = append(flashAll.Environ(), "ANDROID_SERIAL="+serialNumber)
+			flashAll.Env = append(flashAll.Environ(), "DEVICE_FLASHER_VERSION="+version)
 			err := flashAll.Run()
 			if err != nil {
 				errorln("Failed to flash "+device+" "+serialNumber, false)
