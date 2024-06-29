@@ -51,6 +51,24 @@
       "parentUuid": "73bad416_8dfba838",
       "revId": "cb6844755bcd5ccefe6f67f9e335c0c1f1a6dcb8",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "845fae28_1f149e82",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-06-29T00:31:27Z",
+      "side": 1,
+      "message": "15947: device-flasher: No more adb | https://review.calyxos.org/c/CalyxOS/calyxos.org/+/15947",
+      "parentUuid": "57a8f32b_319e0b5e",
+      "revId": "cb6844755bcd5ccefe6f67f9e335c0c1f1a6dcb8",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
