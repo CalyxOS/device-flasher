@@ -34,6 +34,24 @@
       "parentUuid": "76903007_92a04745",
       "revId": "dab0c4f5bf1da6dd07db9b52bc123bf590463db8",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4b8de3db_24ced61e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2024-08-05T17:27:05Z",
+      "side": 1,
+      "message": "From LineageOS discord:\n\n\"I updated android-tools updated from 34 to 35 on 07/15. Downgraded back to 34 and stuff works again. So... anyone know what changed in adb from sdk ver 34 to 35? Something in there broke push/install, at least for my 4.9 devices.\"\n\nSo I would be against updating to 35 for now since there is no device that requires newer versions yet.",
+      "parentUuid": "288602a6_c827eef8",
+      "revId": "dab0c4f5bf1da6dd07db9b52bc123bf590463db8",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
