@@ -72,6 +72,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "96912853_45f9eabd",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-08-05T22:38:17Z",
+      "side": 1,
+      "message": "https://developer.android.com/tools/releases/platform-tools#3502_july_2024",
+      "parentUuid": "35eccdea_4efcfef8",
+      "revId": "dab0c4f5bf1da6dd07db9b52bc123bf590463db8",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "82a9ea56_4597f946",
