@@ -90,6 +90,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "b3794c4a_40959490",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000062
+      },
+      "writtenOn": "2024-08-12T15:26:39Z",
+      "side": 1,
+      "message": "It sounds like we are currently waiting on a report back from the specific person who had a problem. I didn\u0027t see issues with 35 myself, so I can\u0027t tell if 35.0.2 fixed anything.",
+      "parentUuid": "96912853_45f9eabd",
+      "revId": "dab0c4f5bf1da6dd07db9b52bc123bf590463db8",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "82a9ea56_4597f946",
