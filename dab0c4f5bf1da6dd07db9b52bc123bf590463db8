@@ -126,6 +126,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "7884eca4_277bf61e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-09-07T21:03:17Z",
+      "side": 1,
+      "message": "Pixel 9 / Android 15 are also fine with 33.0.1 FTR\n\nhttps://android.googlesource.com/device/common/+/refs/tags/android-14.0.0_r74/generate-factory-images-common.sh\nhttps://android.googlesource.com/device/common/+/refs/tags/android-15.0.0_r1/generate-factory-images-common.sh",
+      "parentUuid": "0fe6c35f_631655f0",
+      "revId": "dab0c4f5bf1da6dd07db9b52bc123bf590463db8",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "82a9ea56_4597f946",
