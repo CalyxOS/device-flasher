@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f7a8b6e0_15f6cc24",
+        "filename": "flasher.go",
+        "patchSetId": 6
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-09-07T21:10:21Z",
+      "side": 1,
+      "message": "https://dl.google.com/android/repository/platform-tools_r35.0.2-windows.zip is 404",
+      "revId": "3ab3502cf8970b1092fe278104fcde9bedddbe30",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
