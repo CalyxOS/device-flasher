@@ -112,11 +112,7 @@ func main() {
 	warnln("3. Enable OEM Unlocking (Settings -> System -> Advanced -> Developer Options)")
 	warnln("4. Disconnect the USB cable from your device")
 	warnln("4.1. Power off your device")
-	if device == "axolotl" {
-		warnln("4.2. Hold volume up and connect the cable to boot it into fastboot mode.")
-	} else {
-		warnln("4.2. Hold volume down and connect the cable to boot it into fastboot mode.")
-	}
+	warnln("4.2. Hold volume down and connect the cable to boot it into fastboot mode.")
 	fmt.Println()
 	fmt.Print(Warn("Press ENTER to continue"))
 	_, _ = fmt.Scanln(&input)
