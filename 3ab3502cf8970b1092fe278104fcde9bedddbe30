@@ -3,6 +3,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "c0ce383b_6f01797d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000000
+      },
+      "writtenOn": "2024-09-09T19:18:16Z",
+      "side": 1,
+      "message": "https://matrix.to/#/!UlsAcjNSfQqWJPccIO:matrix.org/$caMqaJaFihINGBSOiPT_CIIxRCgDHu_XJ615u6dsKDM?via\u003dcalyx.dev\u0026via\u003dmatrix.org\u0026via\u003dtchncs.de\n\nFP4: `./flash-all.sh: line 87: 98432 Segmentation fault      (core dumped) fastboot --skip-reboot -w update image-FP4-ap2a.240905.003.zip`\n\nWith  34.0.5 and 35.0.2 on Fedora 40",
+      "revId": "3ab3502cf8970b1092fe278104fcde9bedddbe30",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "f7a8b6e0_15f6cc24",
         "filename": "flasher.go",
         "patchSetId": 6
