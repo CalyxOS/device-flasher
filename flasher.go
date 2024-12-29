@@ -300,14 +300,14 @@ func getUnlockAbility(device string) string {
 // Finished. Total time: 0.009s
 
 func isNotLocked(serialNumber string, device string) bool {
-	if device == "devon" || device == "hawao" || device == "rhode" {
+	if device == "devon" || device == "hawao" || device == "rhode" || device == "bangkk" || device == "fogos" {
 		return getVar("securestate", serialNumber) != "flashing_locked"
 	}
 	return getVar("unlocked", serialNumber) != "no"
 }
 
 func isNotUnlocked(serialNumber string, device string) bool {
-	if device == "devon" || device == "hawao" || device == "rhode" {
+	if device == "devon" || device == "hawao" || device == "rhode" || device == "bangkk" || device == "fogos" {
 		return getVar("securestate", serialNumber) != "flashing_unlocked"
 	}
 	return getVar("unlocked", serialNumber) != "yes"
