@@ -357,10 +357,10 @@ func flashDevices(devices map[string]string) {
 			_ = platformToolCommand.Run()
 			fmt.Println("Unlocking " + device + " " + serialNumber + " bootloader...")
 			warnln("5. Please use the volume and power keys on the device to unlock the bootloader")
-			if device == "FP4" || device == "FP5" || device == "axolotl" {
+			if device == "FP4" || device == "FP5" || device == "axolotl" || device == "otter" {
 				fmt.Println()
 				warnln("  5a. Once " + device + " " + serialNumber + " boots, disconnect its cable and power it off")
-				if device == "axolotl" {
+				if device == "axolotl" || device == "otter" {
 					warnln("  5b. Then, hold volume up and connect the cable again to boot it into fastboot mode.")
 				} else {
 					warnln("  5b. Then, hold volume down and connect the cable again to boot it into fastboot mode.")
@@ -377,7 +377,7 @@ func flashDevices(devices map[string]string) {
 					return
 				}
 			}
-			if device == "FP4" || device == "FP5" {
+			if device == "FP4" || device == "FP5" || device == "otter" {
 				for i := 0; getCriticalUnlocked(serialNumber) != "true"; i++ {
 					fmt.Println("Unlocking (critical) " + device + " " + serialNumber + " bootloader...")
 					warnln("5.1. Please use the volume and power keys on the device to unlock the bootloader (critical)")
@@ -424,7 +424,7 @@ func flashDevices(devices map[string]string) {
 				_ = platformToolCommand.Start()
 				time.Sleep(30 * time.Second)
 				if i >= 2 {
-					if device == "FP4" || device == "FP5" || device == "axolotl" {
+					if device == "FP4" || device == "FP5" || device == "axolotl" || device == "otter" {
 						errorln("Unable to determine if bootloader was locked", true)
 						return
 					}
