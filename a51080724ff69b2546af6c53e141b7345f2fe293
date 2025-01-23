@@ -16,6 +16,24 @@
       "message": "I wonder if we could patch the calyx branch of the bootloader to remove the reboot.\n\nI\u0027d be tempted to swap the keys too but then that\u0027s confusing for otter / shift users.",
       "revId": "a51080724ff69b2546af6c53e141b7345f2fe293",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b8863b27_ed269ca1",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2025-01-23T15:27:54Z",
+      "side": 1,
+      "message": "That won\u0027t work, since stock users will be coming from stock bootloader, so then you have to add even more conditionals to the flasher based on what bootloader they have. We don\u0027t want to behave differently, unless we want to change upstream bootloader for everyone",
+      "parentUuid": "1a9a4346_80efb747",
+      "revId": "a51080724ff69b2546af6c53e141b7345f2fe293",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
