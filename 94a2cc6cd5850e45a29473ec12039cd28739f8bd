@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "043d65b0_ea66d6b6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2026-07-01T15:57:28Z",
+      "side": 1,
+      "message": "We\u0027ll have to tag a new device-flasher version and build it for this change to appear",
+      "revId": "94a2cc6cd5850e45a29473ec12039cd28739f8bd",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
