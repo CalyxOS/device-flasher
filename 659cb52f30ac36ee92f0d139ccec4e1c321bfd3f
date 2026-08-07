@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6680071d_e6f14315",
+        "filename": "flasher.go",
+        "patchSetId": 1
+      },
+      "lineNbr": 420,
+      "author": {
+        "id": 1000136
+      },
+      "writtenOn": "2026-08-07T17:36:53Z",
+      "side": 1,
+      "message": "This page can benefit from an update if this issue is still being hit.",
+      "range": {
+        "startLine": 420,
+        "startChar": 0,
+        "endLine": 420,
+        "endChar": 80
+      },
+      "revId": "659cb52f30ac36ee92f0d139ccec4e1c321bfd3f",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
