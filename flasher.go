@@ -417,7 +417,8 @@ func flashDevices(devices map[string]string) {
 				if (device == "FP4" || device == "FP5" || device == "FP6") && getUnlockAbility(serialNumber) != "1" {
 					errorln("Not locking bootloader of "+device+" "+serialNumber, false)
 					errorln("fastboot flashing get_unlock_ability returned 0", false)
-					errorln("Please visit https://calyxos.org/FP4 for more information.", true)
+					errorln("Please try running device-flasher again.", false)
+					errorln("You can visit https://calyxos.org/fairphone-relock for more information.", true)
 					return
 				}
 				platformToolCommand = *fastboot
