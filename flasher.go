@@ -20,6 +20,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -33,7 +34,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"flag"
 )
 
 var input string
@@ -93,10 +93,10 @@ func warnln(warning interface{}) {
 
 func init() {
 	flag.BoolVar(&parallel, "parallel", false, "Flash multiple devices at the same time.")
-	flag.Parse()
 }
 
 func main() {
+	flag.Parse()
 	_ = os.Remove("error.log")
 	fmt.Println("Android Factory Image Flasher version " + version)
 	// Map device codenames to their corresponding extracted factory image folders
