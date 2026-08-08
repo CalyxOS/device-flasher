@@ -33,6 +33,24 @@
       "message": "https://dl.google.com/android/repository/platform-tools_r35.0.2-windows.zip is 404",
       "revId": "3ab3502cf8970b1092fe278104fcde9bedddbe30",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "06d3aa08_bea48e48",
+        "filename": "flasher.go",
+        "patchSetId": 6
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2026-08-08T15:02:36Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "f7a8b6e0_15f6cc24",
+      "revId": "3ab3502cf8970b1092fe278104fcde9bedddbe30",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }

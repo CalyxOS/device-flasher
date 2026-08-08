@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9c80b2d7_4544283b",
+        "filename": "flasher.go",
+        "patchSetId": 8
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2026-08-08T15:02:36Z",
+      "side": 1,
+      "message": "Are we fine with this? Direct link to specific windows versions hasn\u0027t worked for over 2 years now",
+      "revId": "4bed571678cd54256708f52be3145fbbf6c376b5",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
