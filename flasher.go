@@ -17,6 +17,7 @@ package main
 
 import (
 	"archive/zip"
+	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
@@ -30,6 +31,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"sync"
@@ -351,6 +353,22 @@ func getProp(prop string, device string) string {
 	return strings.Trim(string(out), "[]\n\r")
 }
 
+var antiRollbackDowngradeRegex = regexp.MustCompile(`(?i)(\S+) anti rollback downgrade, (\d+) vs (\d+)`)
+
+// getAntiRollbackDowngrades scans the flash-all output for fastboot warnings of the form
+// "WARNING: vbmeta_a anti rollback downgrade, 25 vs 27" and returns a summary of each
+// downgrade, e.g. "vbmeta_a: rollback index 25 vs 27".
+func getAntiRollbackDowngrades(output string) []string {
+	downgrades := []string{}
+	for _, line := range strings.Split(output, "\n") {
+		match := antiRollbackDowngradeRegex.FindStringSubmatch(line)
+		if match != nil {
+			downgrades = append(downgrades, fmt.Sprintf("%s: rollback index %s vs %s", match[1], match[2], match[3]))
+		}
+	}
+	return downgrades
+}
+
 func flashDevices(devices map[string]string) {
 	var wg sync.WaitGroup
 	for serialNumber, device := range devices {
@@ -406,7 +424,9 @@ func flashDevices(devices map[string]string) {
 				}
 			}())
 			flashAll.Dir = deviceFactoryFolderMap[device]
-			flashAll.Stderr = os.Stderr
+			var flashAllOutput bytes.Buffer
+			flashAll.Stdout = io.MultiWriter(os.Stdout, &flashAllOutput)
+			flashAll.Stderr = io.MultiWriter(os.Stderr, &flashAllOutput)
 			flashAll.Env = append(flashAll.Environ(), "ANDROID_SERIAL="+serialNumber)
 			flashAll.Env = append(flashAll.Environ(), "DEVICE_FLASHER_VERSION="+version)
 			err := flashAll.Run()
@@ -415,27 +435,43 @@ func flashDevices(devices map[string]string) {
 				errorln(err.Error(), false)
 				return
 			}
-			fmt.Println("Locking " + device + " " + serialNumber + " bootloader...")
-			warnln("6. Please use the volume and power keys on the device to lock the bootloader")
-			for i := 0; isNotLocked(serialNumber, device); i++ {
-				if (device == "FP4" || device == "FP5" || device == "FP6") && getUnlockAbility(serialNumber) != "1" {
-					errorln("Not locking bootloader of "+device+" "+serialNumber, false)
-					errorln("fastboot flashing get_unlock_ability returned 0", false)
-					errorln("Please try running device-flasher again.", false)
-					errorln("You can visit https://calyxos.org/fairphone-relock for more information.", true)
-					return
+			var downgrades []string
+			if isMotorola(device) {
+				downgrades = getAntiRollbackDowngrades(flashAllOutput.String())
+			}
+			if len(downgrades) > 0 {
+				errorln("Anti-rollback downgrade detected, not locking bootloader of "+device+" "+serialNumber, false)
+				errorln("The flashed factory image has a lower AVB rollback index than the OS previously on the device:", false)
+				for _, downgrade := range downgrades {
+					warnln("  " + downgrade)
 				}
-				platformToolCommand = *fastboot
-				platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "lock")
-				_ = platformToolCommand.Start()
-				time.Sleep(30 * time.Second)
-				if i >= 2 {
-					if device == "FP4" || device == "FP5" || device == "FP6" || device == "axolotl" || device == "otter" {
-						errorln("Unable to determine if bootloader was locked", true)
+				errorln("Locking the bootloader now will prevent the device from booting, so it has been left unlocked.", false)
+				errorln("Flash a newer factory image to be able to relock the bootloader.", false)
+				errorln("You can visit https://calyxos.org/motorola-relock for more information.", true)
+				return
+			} else {
+				fmt.Println("Locking " + device + " " + serialNumber + " bootloader...")
+				warnln("6. Please use the volume and power keys on the device to lock the bootloader")
+				for i := 0; isNotLocked(serialNumber, device); i++ {
+					if (device == "FP4" || device == "FP5" || device == "FP6") && getUnlockAbility(serialNumber) != "1" {
+						errorln("Not locking bootloader of "+device+" "+serialNumber, false)
+						errorln("fastboot flashing get_unlock_ability returned 0", false)
+						errorln("Please try running device-flasher again.", false)
+						errorln("You can visit https://calyxos.org/fairphone-relock for more information.", true)
 						return
 					}
-					errorln("Failed to lock "+device+" "+serialNumber+" bootloader", false)
-					return
+					platformToolCommand = *fastboot
+					platformToolCommand.Args = append(platformToolCommand.Args, "-s", serialNumber, "flashing", "lock")
+					_ = platformToolCommand.Start()
+					time.Sleep(30 * time.Second)
+					if i >= 2 {
+						if device == "FP4" || device == "FP5" || device == "FP6" || device == "axolotl" || device == "otter" {
+							errorln("Unable to determine if bootloader was locked", true)
+							return
+						}
+						errorln("Failed to lock "+device+" "+serialNumber+" bootloader", false)
+						return
+					}
 				}
 			}
 			fmt.Println("Rebooting " + device + " " + serialNumber + "...")
