@@ -257,6 +257,10 @@ func getDevices() map[string]string {
 	return devices
 }
 
+func isMotorola(device string) bool {
+	return device == "devon" || device == "hawao" || device == "rhode" || device == "bangkk" || device == "fogo" || device == "fogos"
+}
+
 // $ fastboot getvar prop
 // prop: value
 // Finished. Total time: 0.002s
@@ -306,14 +310,14 @@ func getUnlockAbility(device string) string {
 // Finished. Total time: 0.009s
 
 func isNotLocked(serialNumber string, device string) bool {
-	if device == "devon" || device == "hawao" || device == "rhode" || device == "bangkk" || device == "fogo" || device == "fogos" {
+	if isMotorola(device) {
 		return getVar("securestate", serialNumber) != "flashing_locked"
 	}
 	return getVar("unlocked", serialNumber) != "no"
 }
 
 func isNotUnlocked(serialNumber string, device string) bool {
-	if device == "devon" || device == "hawao" || device == "rhode" || device == "bangkk" || device == "fogo" || device == "fogos" {
+	if isMotorola(device) {
 		return getVar("securestate", serialNumber) != "flashing_unlocked"
 	}
 	return getVar("unlocked", serialNumber) != "yes"
