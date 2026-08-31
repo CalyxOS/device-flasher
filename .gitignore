@@ -7,6 +7,9 @@
 *.darwin
 *.linux
 
+# Checksums
+*.sha256sum
+
 # Jetbrains IDE configuration files
 .idea
 
