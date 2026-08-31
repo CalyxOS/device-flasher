@@ -2,6 +2,7 @@ PROGRAM_NAME ?= device-flasher
 EXTENSIONS := linux exe darwin
 NAMES := $(PROGRAM_NAME)
 PROGRAMS := $(foreach PROG,$(NAMES),$(foreach EXT,$(EXTENSIONS),$(PROG).$(EXT)))
+CHECKSUMS := $(foreach PROG,$(PROGRAMS),$(PROG).sha256sum)
 VERSION := $(shell git describe --always --tags --dirty='-dirty')
 LDFLAGS := -ldflags "-X main.version=$(VERSION) -buildid=" -trimpath
 COMMON_ARGS := GOARCH=amd64 CGO_ENABLED=0
@@ -20,9 +21,12 @@ $(PROGRAM_NAME).exe:
 $(PROGRAM_NAME).darwin:
 	$(COMMON_ARGS) GOOS=darwin go build $(TAGS) $(LDFLAGS) -o $@
 
+%.sha256sum: %
+	sha256sum $< > $@
+
 .PHONY: build
-build: $(PROGRAMS)
+build: $(PROGRAMS) $(CHECKSUMS)
 	@echo Built $(VERSION)
 
 clean:
-	-rm $(PROGRAMS)
+	-rm -f $(PROGRAMS) $(CHECKSUMS)
