@@ -34,6 +34,24 @@
       "parentUuid": "9c80b2d7_4544283b",
       "revId": "4bed571678cd54256708f52be3145fbbf6c376b5",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5fd58952_858f87c6",
+        "filename": "flasher.go",
+        "patchSetId": 8
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1000136
+      },
+      "writtenOn": "2026-09-10T19:50:34Z",
+      "side": 1,
+      "message": "After discussion: the plan is to rehost the required platform-tools on release.calyxos.org with the device-flasher and reference the file origin (for documentation and fallback purposes). This way, we don\u0027t need to unnecessarily communicate with third parties: google, wayback machine or otherwise.\n\n* http://release.calyxos.org/device-flasher/platform-tools/platform-tools_r37.0.1-windows.zip\n* http://release.calyxos.org/device-flasher/platform-tools/platform-tools_r37.0.1-linux.zip\n* http://release.calyxos.org/device-flasher/platform-tools/platform-tools_r37.0.1-darwin.zip",
+      "parentUuid": "9c80b2d7_4544283b",
+      "revId": "4bed571678cd54256708f52be3145fbbf6c376b5",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
