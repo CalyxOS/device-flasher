@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: The Calyx Institute
 # SPDX-License-Identifier: Apache-2.0
 
-exclude: '^(vendor|src)/'
+exclude: '^(vendor|src|LICENSES)/'
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -47,3 +47,8 @@ repos:
         language: system
         pass_filenames: false
         types: [go]
+
+  - repo: https://github.com/fsfe/reuse-tool
+    rev: v6.2.0
+    hooks:
+      - id: reuse

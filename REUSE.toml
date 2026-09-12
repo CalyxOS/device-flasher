@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: The Calyx Institute
+# SPDX-License-Identifier: Apache-2.0
+
+version = 1
+
+# Vendored third-party code keeps its upstream license (golang.org/x/sys).
+[[annotations]]
+path = ["go.sum", "vendor/**"]
+precedence = "override"
+SPDX-FileCopyrightText = "The Go Authors"
+SPDX-License-Identifier = "BSD-3-Clause"
+
+[[annotations]]
+path = [".gitignore", ".gitmodules"]
+precedence = "override"
+SPDX-FileCopyrightText = [
+    "2020 CIS Maxwell, LLC. All rights reserved.",
+    "The Calyx Institute"
+]
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = [".gitreview"]
+precedence = "override"
+SPDX-FileCopyrightText = "The Calyx Institute"
+SPDX-License-Identifier = "Apache-2.0"

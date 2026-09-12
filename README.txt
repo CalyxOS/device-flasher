@@ -1,5 +1,6 @@
-Copyright © 2020 CIS Maxwell, LLC. All rights reserved.
-Copyright © 2020-2026 The Calyx Institute
+SPDX-FileCopyrightText: 2020 CIS Maxwell, LLC. All rights reserved.
+SPDX-FileCopyrightText: The Calyx Institute
+SPDX-License-Identifier: Apache-2.0
 
 Build:
 Install Go on your machine https://golang.org/doc/install

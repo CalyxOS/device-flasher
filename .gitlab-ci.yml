@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: The Calyx Institute
+# SPDX-License-Identifier: Apache-2.0
+
 # Keep this image in sync with IMAGE in build.sh
 image: golang:1.26.8
 
