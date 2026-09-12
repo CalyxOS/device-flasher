@@ -1,4 +1,10 @@
-image: golang:latest
+# Keep this image in sync with IMAGE in build.sh
+image: golang:1.26.8
+
+variables:
+  GOCACHE: /tmp/gocache
+  GOPATH: /tmp/gopath
+  GIT_DEPTH: 0
 
 stages:
   - test
@@ -17,7 +23,10 @@ compile:
   script:
     - make
   artifacts:
+    name: device-flasher
+    expire_in: 1 week
     paths:
       - '*.linux'
       - '*.exe'
       - '*.darwin'
+      - '*.sha256sum'
