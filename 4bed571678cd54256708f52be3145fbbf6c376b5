@@ -52,6 +52,24 @@
       "parentUuid": "9c80b2d7_4544283b",
       "revId": "4bed571678cd54256708f52be3145fbbf6c376b5",
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b413d2e5_86a09db1",
+        "filename": "flasher.go",
+        "patchSetId": 8
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2026-09-12T13:37:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5fd58952_858f87c6",
+      "revId": "4bed571678cd54256708f52be3145fbbf6c376b5",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
     }
   ]
 }
