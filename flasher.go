@@ -69,14 +69,14 @@ var (
 	Yellow = Color("\033[1;33m%s\033[0m")
 )
 
-func Color(color string) func(...interface{}) string {
-	return func(args ...interface{}) string {
+func Color(color string) func(...any) string {
+	return func(args ...any) string {
 		return fmt.Sprintf(color,
 			fmt.Sprint(args...))
 	}
 }
 
-func errorln(err interface{}, fatal bool) {
+func errorln(err any, fatal bool) {
 	log, _ := os.OpenFile("error.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	_, _ = fmt.Fprintln(log, err)
 	_, _ = fmt.Fprintln(os.Stderr, Error(err))
@@ -88,7 +88,7 @@ func errorln(err interface{}, fatal bool) {
 	}
 }
 
-func warnln(warning interface{}) {
+func warnln(warning any) {
 	fmt.Println(Warn(warning))
 }
 
@@ -273,8 +273,8 @@ func getVar(prop string, device string) string {
 	if err != nil {
 		return ""
 	}
-	lines := strings.Split(string(out), "\n")
-	for _, line := range lines {
+	lines := strings.SplitSeq(string(out), "\n")
+	for line := range lines {
 		if strings.Contains(line, prop) {
 			return strings.Trim(strings.Split(line, " ")[1], "\r")
 		}
@@ -293,8 +293,8 @@ func getUnlockAbility(device string) string {
 	if err != nil {
 		return ""
 	}
-	lines := strings.Split(string(out), "\n")
-	for _, line := range lines {
+	lines := strings.SplitSeq(string(out), "\n")
+	for line := range lines {
 		if strings.Contains(line, "get_unlock_ability") {
 			return strings.Trim(strings.Split(line, " ")[2], "\r")
 		}
@@ -339,8 +339,8 @@ func getCriticalUnlocked(device string) string {
 	if err != nil {
 		return ""
 	}
-	lines := strings.Split(string(out), "\n")
-	for _, line := range lines {
+	lines := strings.SplitSeq(string(out), "\n")
+	for line := range lines {
 		if strings.Contains(line, "Device critical unlocked:") {
 			return strings.Trim(strings.Split(line, " ")[4], "\r")
 		}
@@ -365,7 +365,7 @@ var antiRollbackDowngradeRegex = regexp.MustCompile(`(?i)(\S+) anti rollback dow
 // downgrade, e.g. "vbmeta_a: rollback index 25 vs 27".
 func getAntiRollbackDowngrades(output string) []string {
 	downgrades := []string{}
-	for _, line := range strings.Split(output, "\n") {
+	for line := range strings.SplitSeq(output, "\n") {
 		match := antiRollbackDowngradeRegex.FindStringSubmatch(line)
 		if match != nil {
 			downgrades = append(downgrades, fmt.Sprintf("%s: rollback index %s vs %s", match[1], match[2], match[3]))
