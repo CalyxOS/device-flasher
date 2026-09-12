@@ -238,6 +238,9 @@ func getDevices() map[string]string {
 					if device == "sdm845" {
 						device = "axolotl"
 					}
+					if device == "FP6_US" {
+						device = "FP6"
+					}
 				}
 				fmt.Print("Detected " + device + " " + serialNumber)
 				if _, ok := deviceFactoryFolderMap[device]; ok {
