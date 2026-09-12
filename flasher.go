@@ -56,7 +56,7 @@ var parallel bool
 var version string
 
 const OS = runtime.GOOS
-const PLATFORM_TOOLS_VERSION = "37.0.1"
+const PlatformToolsVersion = "37.0.1"
 
 var (
 	Error = Red
@@ -103,7 +103,7 @@ func main() {
 	// Map device codenames to their corresponding extracted factory image folders
 	deviceFactoryFolderMap = getFactoryFolders()
 	if len(deviceFactoryFolderMap) < 1 {
-		errorln(errors.New("Cannot continue without a device factory image. Exiting..."), true)
+		errorln("Cannot continue without a device factory image. Exiting...", true)
 	}
 	err := getPlatformTools()
 	if err != nil {
@@ -131,9 +131,9 @@ func main() {
 	// Map serial numbers to device codenames by extracting them from adb and fastboot command output
 	devices := getDevices()
 	if len(devices) == 0 {
-		errorln(errors.New("No devices to be flashed. Exiting..."), true)
+		errorln("No devices to be flashed. Exiting...", true)
 	} else if !parallel && len(devices) > 1 {
-		errorln(errors.New("More than one device detected. Exiting..."), true)
+		errorln("More than one device detected. Exiting...", true)
 	}
 	fmt.Println()
 	fmt.Println("Devices to be flashed: ")
@@ -173,7 +173,7 @@ func getFactoryFolders() map[string]string {
 }
 
 func getPlatformTools() error {
-	plaformToolsUrlMap := map[[2]string]string{
+	platformToolsURLMap := map[[2]string]string{
 		// https://dl.google.com/android/repository/platform-tools_r37.0.1-darwin.zip
 		[2]string{"darwin", "37.0.1"}: "http://release.calyxos.org/device-flasher/platform-tools/platform-tools_r37.0.1-darwin.zip",
 		// https://dl.google.com/android/repository/platform-tools_r37.0.1-linux.zip
@@ -186,15 +186,15 @@ func getPlatformTools() error {
 		[2]string{"linux", "37.0.1"}:   "d230f13842f60f782a8645f9c813f8f845bf36089ea7289f28c48f17979313f1",
 		[2]string{"windows", "37.0.1"}: "45f4d63113e895ebde0c90f194099a4676b6ac653bd28d54314a9e022bbc1a99",
 	}
-	platformToolsOsVersion := [2]string{OS, PLATFORM_TOOLS_VERSION}
-	_, err := os.Stat(path.Base(plaformToolsUrlMap[platformToolsOsVersion]))
+	platformToolsOsVersion := [2]string{OS, PlatformToolsVersion}
+	_, err := os.Stat(path.Base(platformToolsURLMap[platformToolsOsVersion]))
 	if err != nil {
-		err = downloadFile(plaformToolsUrlMap[platformToolsOsVersion])
+		err = downloadFile(platformToolsURLMap[platformToolsOsVersion])
 		if err != nil {
 			return err
 		}
 	}
-	platformToolsZip = path.Base(plaformToolsUrlMap[platformToolsOsVersion])
+	platformToolsZip = path.Base(platformToolsURLMap[platformToolsOsVersion])
 	err = verifyZip(platformToolsZip, platformToolsChecksumMap[platformToolsOsVersion])
 	if err != nil {
 		fmt.Println(platformToolsZip + " checksum verification failed")
@@ -235,9 +235,10 @@ func getDevices() map[string]string {
 		for i, device := range lines {
 			if lines[i] != "" && lines[i] != "\r" {
 				serialNumber, _, _ := strings.Cut(device, "\t")
-				if platformToolCommand.Path == adb.Path {
+				switch platformToolCommand.Path {
+				case adb.Path:
 					device = getProp("ro.product.device", serialNumber)
-				} else if platformToolCommand.Path == fastboot.Path {
+				case fastboot.Path:
 					device = getVar("product", serialNumber)
 					if device == "sdm845" {
 						device = "axolotl"
