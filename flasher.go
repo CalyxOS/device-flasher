@@ -23,7 +23,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math"
 	"net/http"
 	"os"
@@ -147,7 +146,7 @@ func main() {
 }
 
 func getFactoryFolders() map[string]string {
-	files, err := ioutil.ReadDir(cwd)
+	files, err := os.ReadDir(cwd)
 	if err != nil {
 		errorln(err, true)
 	}
