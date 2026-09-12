@@ -1,6 +1,10 @@
 # SPDX-FileCopyrightText: The Calyx Institute
 # SPDX-License-Identifier: Apache-2.0
 
+include:
+  - project: 'CalyxOS/ci-templates'
+    file: '/.gerrit-ci-template.yml'
+
 # Keep this image in sync with IMAGE in build.sh
 image: golang:1.26.8
 
@@ -13,9 +17,11 @@ stages:
   - test
   - build
   - deploy
+  - vote
 
 pre-commit:
   stage: test
+  extends: .gerrit_checkout
   script:
     - apt-get update
     - apt-get install -y --no-install-recommends python3-pip
@@ -24,6 +30,7 @@ pre-commit:
 
 compile:
   stage: build
+  extends: .gerrit_checkout
   script:
     - make
   artifacts:
