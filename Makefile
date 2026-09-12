@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: The Calyx Institute
+# SPDX-License-Identifier: Apache-2.0
+
 PROGRAM_NAME ?= device-flasher
 EXTENSIONS := linux exe darwin darwin.amd64 darwin.arm64
 NAMES := $(PROGRAM_NAME)
