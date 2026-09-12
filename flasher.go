@@ -161,7 +161,7 @@ func getFactoryFolders() map[string]string {
 				errorln("Cannot continue without a factory image. Exiting...", false)
 				errorln(err, true)
 			}
-			device := strings.Split(file, "-")[0]
+			device, _, _ := strings.Cut(file, "-")
 			if _, exists := deviceFactoryFolderMap[device]; !exists {
 				deviceFactoryFolderMap[device] = extracted[0]
 			} else {
@@ -234,7 +234,7 @@ func getDevices() map[string]string {
 		}
 		for i, device := range lines {
 			if lines[i] != "" && lines[i] != "\r" {
-				serialNumber := strings.Split(device, "\t")[0]
+				serialNumber, _, _ := strings.Cut(device, "\t")
 				if platformToolCommand.Path == adb.Path {
 					device = getProp("ro.product.device", serialNumber)
 				} else if platformToolCommand.Path == fastboot.Path {
