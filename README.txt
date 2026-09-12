@@ -19,6 +19,17 @@ Build with Docker:
 
   This runs `make` in a container.
 
+Development:
+  Install pre-commit https://pre-commit.com and enable the git hooks, so
+  that formatting, vet, staticcheck and tests are checked before each commit:
+
+    pip install pre-commit
+    pre-commit install
+
+  Run all the checks on the whole tree at any time:
+
+    pre-commit run --all-files
+
 Execution:
 Plug each device of a same model to a USB port
 

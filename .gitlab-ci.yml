@@ -11,12 +11,13 @@ stages:
   - build
   - deploy
 
-format:
+pre-commit:
   stage: test
   script:
-    - go fmt $(go list ./... | grep -v /vendor/)
-    - go vet $(go list ./... | grep -v /vendor/)
-    - go test -race $(go list ./... | grep -v /vendor/)
+    - apt-get update
+    - apt-get install -y --no-install-recommends python3-pip
+    - pip3 install --break-system-packages --no-cache-dir pre-commit
+    - pre-commit run --all-files --show-diff-on-failure
 
 compile:
   stage: build
