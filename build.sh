@@ -6,7 +6,7 @@
 
 set -eu
 
-image=${IMAGE:-golang:1.26.5}
+image=${IMAGE:-golang:1.26.8}
 
 exec docker run --rm \
 	-v "$PWD":/src \
