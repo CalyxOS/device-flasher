@@ -51,3 +51,5 @@ The following files must be available in the current directory:
     Open a terminal in the current directory
     Type: ./device-flasher.darwin
     Press enter
+
+Test
