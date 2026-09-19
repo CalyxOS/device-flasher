@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5db0872f_39a0b673",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2026-09-19T19:35:35Z",
+      "side": 1,
+      "message": "I\u0027d like a second set of eyes in this chain of changes since I\u0027m not an expert in Go. All this builds and works fine locally, this specific commit will enable CI gerrit votes for future changes in device-flasher",
+      "revId": "d90fc5d0afa740ce79ed1651274c3990d2701f83",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    }
+  ]
+}
