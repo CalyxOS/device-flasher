@@ -435,14 +435,15 @@ func flashDevices(devices map[string]string) {
 				downgrades = getAntiRollbackDowngrades(flashAllOutput.String())
 			}
 			if len(downgrades) > 0 {
-				errorln("Anti-rollback downgrade detected, not locking bootloader of "+device+" "+serialNumber, false)
-				errorln("The flashed factory image has a lower AVB rollback index than the OS previously on the device:", false)
+				errorln("The Anti-Rollback protection has stopped the bootloader relocking of your "+device+" "+serialNumber, false)
+				errorln("CalyxOS has been fully installed. However, the flashed factory image has a lower Anti-Rollback index than the previous OS installed on this device:", false)
 				for _, downgrade := range downgrades {
 					warnln("  " + downgrade)
 				}
-				errorln("Locking the bootloader now will prevent the device from booting, so it has been left unlocked.", false)
-				errorln("Flash a newer factory image to be able to relock the bootloader.", false)
-				errorln("You can visit https://calyxos.org/motorola-relock for more information.", true)
+				errorln("Locking the bootloader now will prevent the device from booting. It will stay unlocked.", false)
+				errorln("Do not try to lock the bootloader manually when you see this warning.", false)
+				errorln("We recommend that you download and flash a newer factory image to be able to relock the bootloader for maximum security.", false)
+				errorln("Visit https://calyxos.org/motorola-relock for more information.", true)
 				return
 			} else {
 				fmt.Println("Locking " + device + " " + serialNumber + " bootloader...")
