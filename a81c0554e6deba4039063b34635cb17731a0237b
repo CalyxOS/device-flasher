@@ -18,6 +18,24 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e53839b9_fe76f026",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2026-09-24T20:07:53Z",
+      "side": 1,
+      "message": "https://review.calyxos.org/c/CalyxOS/device-flasher/+/49380",
+      "parentUuid": "bc6c1c6b_b2f327dd",
+      "revId": "a81c0554e6deba4039063b34635cb17731a0237b",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6db1fbf6_40ea3053",
@@ -31,6 +49,30 @@
       "writtenOn": "2026-09-24T17:05:10Z",
       "side": 1,
       "message": "```suggestion\n\t\t\t\terrorln(\"Anti-rollback protection prevented bootloader relocking of your \"+device+\" \"+serialNumber, false)\n```",
+      "range": {
+        "startLine": 448,
+        "startChar": 13,
+        "endLine": 448,
+        "endChar": 45
+      },
+      "revId": "a81c0554e6deba4039063b34635cb17731a0237b",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f063baf6_c496605f",
+        "filename": "flasher.go",
+        "patchSetId": 5
+      },
+      "lineNbr": 448,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2026-09-24T20:07:53Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "6db1fbf6_40ea3053",
       "range": {
         "startLine": 448,
         "startChar": 13,
@@ -64,6 +106,30 @@
       "serverId": "35266860-6252-469c-a67d-185064479fc0"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3f030db4_da0f4a44",
+        "filename": "flasher.go",
+        "patchSetId": 5
+      },
+      "lineNbr": 453,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2026-09-24T20:07:53Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "8fcf36b4_3ca1b009",
+      "range": {
+        "startLine": 453,
+        "startChar": 13,
+        "endLine": 453,
+        "endChar": 106
+      },
+      "revId": "a81c0554e6deba4039063b34635cb17731a0237b",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8e100a0a_5871ded4",
@@ -77,6 +143,30 @@
       "writtenOn": "2026-09-24T17:05:10Z",
       "side": 1,
       "message": "```suggestion\n\t\t\t\terrorln(\"Download a newer factory image, then run the device-flasher again. The bootloader can be relocked once the device-flasher confirms it is safe to do so.\", false)\n```",
+      "range": {
+        "startLine": 454,
+        "startChar": 13,
+        "endLine": 454,
+        "endChar": 77
+      },
+      "revId": "a81c0554e6deba4039063b34635cb17731a0237b",
+      "serverId": "35266860-6252-469c-a67d-185064479fc0"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e326db8e_fcd38ac7",
+        "filename": "flasher.go",
+        "patchSetId": 5
+      },
+      "lineNbr": 454,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2026-09-24T20:07:53Z",
+      "side": 1,
+      "message": "Acknowledged",
+      "parentUuid": "8e100a0a_5871ded4",
       "range": {
         "startLine": 454,
         "startChar": 13,
