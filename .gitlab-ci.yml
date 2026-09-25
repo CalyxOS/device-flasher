@@ -40,4 +40,6 @@ compile:
       - '*.linux'
       - '*.exe'
       - '*.darwin'
-      - '*.sha256sum'
+      - '*.linux.sha256sum'
+      - '*.exe.sha256sum'
+      - '*.darwin.sha256sum'
