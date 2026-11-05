@@ -24,9 +24,10 @@ pre-commit:
   extends: .gerrit_checkout
   script:
     - apt-get update
-    - apt-get install -y --no-install-recommends python3-pip
-    - pip3 install --break-system-packages --no-cache-dir pre-commit
-    - pre-commit run --all-files --show-diff-on-failure
+    - apt-get install -y --no-install-recommends python3-pip python3-venv
+    - python3 -m venv /tmp/pre-commit-venv
+    - /tmp/pre-commit-venv/bin/pip install --no-cache-dir pre-commit
+    - /tmp/pre-commit-venv/bin/pre-commit run --all-files --show-diff-on-failure
 
 compile:
   stage: build
